@@ -11,3 +11,7 @@ matplotlib
 ipykernel
 tensorflow
 keras
+pydot
+tensorflow-macos
+joblib
+torchinfo
