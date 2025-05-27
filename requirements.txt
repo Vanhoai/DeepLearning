@@ -15,3 +15,5 @@ pydot
 tensorflow-macos
 joblib
 torchinfo
+torchview
+transformers
