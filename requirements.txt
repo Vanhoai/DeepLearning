@@ -17,3 +17,4 @@ joblib
 torchinfo
 torchview
 transformers
+opencv-python
