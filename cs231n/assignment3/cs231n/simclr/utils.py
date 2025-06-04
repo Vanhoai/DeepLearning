@@ -45,7 +45,7 @@ def train(model, data_loader, train_optimizer, epoch, epochs, batch_size=32, tem
         ##############################################################################
         
         train_optimizer.zero_grad()
-        loss.backward()
+        backward()
         train_optimizer.step()
 
         total_num += batch_size
@@ -69,7 +69,7 @@ def train_val(model, data_loader, train_optimizer, epoch, epochs, device='cuda')
 
             if is_train:
                 train_optimizer.zero_grad()
-                loss.backward()
+                backward()
                 train_optimizer.step()
 
             total_num += data.size(0)

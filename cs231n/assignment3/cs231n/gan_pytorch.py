@@ -310,7 +310,7 @@ def run_a_gan(D, G, D_solver, G_solver, discriminator_loss, generator_loss, load
             logits_fake = D(fake_images.view(batch_size, 1, 28, 28))
 
             d_total_error = discriminator_loss(logits_real, logits_fake)
-            d_total_error.backward()
+            backward()
             D_solver.step()
 
             G_solver.zero_grad()
@@ -319,7 +319,7 @@ def run_a_gan(D, G, D_solver, G_solver, discriminator_loss, generator_loss, load
 
             gen_logits_fake = D(fake_images.view(batch_size, 1, 28, 28))
             g_error = generator_loss(gen_logits_fake)
-            g_error.backward()
+            backward()
             G_solver.step()
 
             if (iter_count % show_every == 0):

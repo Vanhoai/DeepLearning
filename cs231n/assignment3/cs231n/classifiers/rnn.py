@@ -143,7 +143,7 @@ class CaptioningRNN:
         # defined above to store loss and gradients; grads[k] should give the      #
         # gradients for self.params[k].                                            #
         #                                                                          #
-        # Note also that you are allowed to make use of functions from layers.py   #
+        # Note also that you are allowed to make use of functions from layer.py   #
         # in your implementation, if needed.                                       #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****

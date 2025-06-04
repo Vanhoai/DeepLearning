@@ -35,7 +35,7 @@ def compute_saliency_maps(X, y, model):
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
     # No softmax because scores are unnormalized
-    loss = model(X)[range(len(y)), y].sum()
+    loss = model(X)[range(len(y)), y]
     loss.backward()
 
     # As in paper, saliency is just the score grad with respect to input (abs+max)
