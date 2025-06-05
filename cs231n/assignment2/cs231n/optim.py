@@ -69,7 +69,7 @@ def sgd_momentum(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    v = config['momentum'] * v - config['learning_rate'] * dw # update velocity
+    v = config["momentum"] * v - config["learning_rate"] * dw # update velocity
     next_w = w + v                                            # update position
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -103,16 +103,16 @@ def rmsprop(w, dw, config=None):
     next_w = None
     ###########################################################################
     # TODO: Implement the RMSprop update formula, storing the next value of w #
-    # in the next_w variable. Don't forget to update cache value stored in    #
-    # config['cache'].                                                        #
+    # in the next_w variable. Don"t forget to update cache value stored in    #
+    # config["cache"].                                                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    keys = ['learning_rate','decay_rate','epsilon','cache'] # keys in this order
+    keys = ["learning_rate","decay_rate","epsilon","cache"] # keys in this order
     lr, dr, eps, cache = (config.get(key) for key in keys)  # vals in this order
 
-    config['cache'] = dr * cache + (1 - dr) * dw**2         # update cache
-    next_w = w - lr * dw / (np.sqrt(config['cache']) + eps) # update w
+    config["cache"] = dr * cache + (1 - dr) * dw**2         # update cache
+    next_w = w - lr * dw / (np.sqrt(config["cache"]) + eps) # update w
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -149,7 +149,7 @@ def adam(w, dw, config=None):
     next_w = None
     ###########################################################################
     # TODO: Implement the Adam update formula, storing the next value of w in #
-    # the next_w variable. Don't forget to update the m, v, and t variables   #
+    # the next_w variable. Don"t forget to update the m, v, and t variables   #
     # stored in config.                                                       #
     #                                                                         #
     # NOTE: In order to match the reference output, please modify t _before_  #
@@ -157,13 +157,13 @@ def adam(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    keys = ['learning_rate','beta1','beta2','epsilon','m','v','t'] # keys in this order
+    keys = ["learning_rate","beta1","beta2","epsilon","m","v","t"] # keys in this order
     lr, beta1, beta2, eps, m, v, t = (config.get(k) for k in keys) # vals in this order
 
-    config['t'] = t = t + 1                             # iteration counter
-    config['m'] = m = beta1 * m + (1 - beta1) * dw      # gradient smoothing (Momentum)
+    config["t"] = t = t + 1                             # iteration counter
+    config["m"] = m = beta1 * m + (1 - beta1) * dw      # gradient smoothing (Momentum)
     mt = m / (1 - beta1**t)                             # bias correction
-    config['v'] = v = beta2 * v + (1 - beta2) * (dw**2) # gradient smoothing (RMSprop)
+    config["v"] = v = beta2 * v + (1 - beta2) * (dw**2) # gradient smoothing (RMSprop)
     vt = v / (1 - beta2**t)                             # bias correction
     next_w = w - lr * mt / (np.sqrt(vt) + eps)          # weight update
 

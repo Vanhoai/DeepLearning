@@ -21,7 +21,7 @@ def im2col_cython(np.ndarray[DTYPE_t, ndim=4] x, int field_height,
 
     cdef int p = padding
     cdef np.ndarray[DTYPE_t, ndim=4] x_padded = np.pad(x,
-            ((0, 0), (0, 0), (p, p), (p, p)), mode='constant')
+            ((0, 0), (0, 0), (p, p), (p, p)), mode="constant")
 
     cdef np.ndarray[DTYPE_t, ndim=2] cols = np.zeros(
             (C * field_height * field_width, N * HH * WW),

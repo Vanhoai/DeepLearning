@@ -53,9 +53,9 @@ def generic_forward(x, w, b, gamma=None, beta=None, bn_param=None, dropout_param
     # If the the layer is not last
     if not last:
         # If it has normalization layer we normalize outputs: if it bn_param
-        # has mode (train | test), it's batchnorm, otherwise, it's layernorm
+        # has mode (train | test), it"s batchnorm, otherwise, it"s layernorm
         if bn_param is not None:
-            if 'mode' in bn_param:
+            if "mode" in bn_param:
                 out, bn_cache = batchnorm_forward(out, gamma, beta, bn_param)
             else:
                 out, ln_cache = layernorm_forward(out, gamma, beta, bn_param)

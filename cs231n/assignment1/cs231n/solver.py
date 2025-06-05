@@ -35,16 +35,16 @@ class Solver(object):
     Example usage might look something like this:
 
     data = {
-      'X_train': # training data
-      'y_train': # training labels
-      'X_val': # validation data
-      'y_val': # validation labels
+      "X_train": # training data
+      "y_train": # training labels
+      "X_val": # validation data
+      "y_val": # validation labels
     }
     model = MyAwesomeModel(hidden_size=100, reg=10)
     solver = Solver(model, data,
-                    update_rule='sgd',
+                    update_rule="sgd",
                     optim_config={
-                      'learning_rate': 1e-3,
+                      "learning_rate": 1e-3,
                     },
                     lr_decay=0.95,
                     num_epochs=10, batch_size=100,
@@ -85,18 +85,18 @@ class Solver(object):
         Required arguments:
         - model: A model object conforming to the API described above
         - data: A dictionary of training and validation data containing:
-          'X_train': Array, shape (N_train, d_1, ..., d_k) of training images
-          'X_val': Array, shape (N_val, d_1, ..., d_k) of validation images
-          'y_train': Array, shape (N_train,) of labels for training images
-          'y_val': Array, shape (N_val,) of labels for validation images
+          "X_train": Array, shape (N_train, d_1, ..., d_k) of training images
+          "X_val": Array, shape (N_val, d_1, ..., d_k) of validation images
+          "y_train": Array, shape (N_train,) of labels for training images
+          "y_val": Array, shape (N_val,) of labels for validation images
 
         Optional arguments:
         - update_rule: A string giving the name of an update rule in optim.py.
-          Default is 'sgd'.
+          Default is "sgd".
         - optim_config: A dictionary containing hyperparameters that will be
           passed to the chosen update rule. Each update rule requires different
           hyperparameters (see optim.py) but all update rules require a
-          'learning_rate' parameter so that should always be present.
+          "learning_rate" parameter so that should always be present.
         - lr_decay: A scalar for learning rate decay; after each epoch the
           learning rate is multiplied by this value.
         - batch_size: Size of minibatches used to compute loss and gradient
@@ -134,20 +134,20 @@ class Solver(object):
 
         # Throw an error if there are extra keyword arguments
         if len(kwargs) > 0:
-            extra = ", ".join('"%s"' % k for k in list(kwargs.keys()))
+            extra = ", ".join(""%s"" % k for k in list(kwargs.keys()))
             raise ValueError("Unrecognized arguments %s" % extra)
 
         # Make sure the update rule exists, then replace the string
         # name with the actual function
         if not hasattr(optim, self.update_rule):
-            raise ValueError('Invalid update_rule "%s"' % self.update_rule)
+            raise ValueError("Invalid update_rule "%s"" % self.update_rule)
         self.update_rule = getattr(optim, self.update_rule)
 
         self._reset()
 
     def _reset(self):
         """
-        Set up some book-keeping variables for optimization. Don't call this
+        Set up some book-keeping variables for optimization. Don"t call this
         manually.
         """
         # Set up some variables for book-keeping
@@ -205,7 +205,7 @@ class Solver(object):
         }
         filename = "%s_epoch_%d.pkl" % (self.checkpoint_name, self.epoch)
         if self.verbose:
-            print('Saving checkpoint to "%s"' % filename)
+            print("Saving checkpoint to "%s"" % filename)
         with open(filename, "wb") as f:
             pickle.dump(checkpoint, f)
 

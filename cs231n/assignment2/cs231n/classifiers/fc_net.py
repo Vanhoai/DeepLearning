@@ -75,14 +75,14 @@ class FullyConnectedNet(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         for l, (i, j) in enumerate(zip([input_dim, *hidden_dims], [*hidden_dims, num_classes])):
-            self.params[f'W{l+1}'] = np.random.randn(i, j) * weight_scale
-            self.params[f'b{l+1}'] = np.zeros(j)
+            self.params[f"W{l+1}"] = np.random.randn(i, j) * weight_scale
+            self.params[f"b{l+1}"] = np.zeros(j)
 
             if self.normalization and l < self.num_layers-1:
-                self.params[f'gamma{l+1}'] = np.ones(j)
-                self.params[f'beta{l+1}'] = np.zeros(j)
+                self.params[f"gamma{l+1}"] = np.ones(j)
+                self.params[f"beta{l+1}"] = np.zeros(j)
 
-        # del self.params[f'gamma{l+1}'], self.params[f'beta{l+1}'] # no batchnorm after last FC
+        # del self.params[f"gamma{l+1}"], self.params[f"beta{l+1}"] # no batchnorm after last FC
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
@@ -146,10 +146,10 @@ class FullyConnectedNet(object):
         # TODO: Implement the forward pass for the fully connected net, computing  #
         # the class scores for X and storing them in the scores variable.          #
         #                                                                          #
-        # When using dropout, you'll need to pass self.dropout_param to each       #
+        # When using dropout, you"ll need to pass self.dropout_param to each       #
         # dropout forward pass.                                                    #
         #                                                                          #
-        # When using batch normalization, you'll need to pass self.bn_params[0] to #
+        # When using batch normalization, you"ll need to pass self.bn_params[0] to #
         # the forward pass for the first batch normalization layer, pass           #
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
@@ -159,7 +159,7 @@ class FullyConnectedNet(object):
         cache = {}
         
         for l in range(self.num_layers):
-            keys = [f'W{l+1}', f'b{l+1}', f'gamma{l+1}', f'beta{l+1}']   # list of params
+            keys = [f"W{l+1}", f"b{l+1}", f"gamma{l+1}", f"beta{l+1}"]   # list of params
             w, b, gamma, beta = (self.params.get(k, None) for k in keys) # get param vals
 
             bn = self.bn_params[l] if gamma is not None else None  # bn params if exist
@@ -183,9 +183,9 @@ class FullyConnectedNet(object):
         # TODO: Implement the backward pass for the fully connected net. Store the #
         # loss in the loss variable and gradients in the grads dictionary. Compute #
         # data loss using softmax, and make sure that grads[k] holds the gradients #
-        # for self.params[k]. Don't forget to add L2 regularization!               #
+        # for self.params[k]. Don"t forget to add L2 regularization!               #
         #                                                                          #
-        # When using batch/layer normalization, you don't need to regularize the   #
+        # When using batch/layer normalization, you don"t need to regularize the   #
         # scale and shift parameters.                                              #
         #                                                                          #
         # NOTE: To ensure that your implementation matches ours and you pass the   #
@@ -195,17 +195,17 @@ class FullyConnectedNet(object):
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         loss, dout = softmax_loss(scores, y)
-        loss += 0.5 * self.reg * np.sum([np.sum(W**2) for k, W in self.params.items() if 'W' in k])
+        loss += 0.5 * self.reg * np.sum([np.sum(W**2) for k, W in self.params.items() if "W" in k])
 
         for l in reversed(range(self.num_layers)):
             dout, dW, db, dgamma, dbeta = generic_backward(dout, cache[l])
 
-            grads[f'W{l+1}'] = dW + self.reg * self.params[f'W{l+1}']
-            grads[f'b{l+1}'] = db
+            grads[f"W{l+1}"] = dW + self.reg * self.params[f"W{l+1}"]
+            grads[f"b{l+1}"] = db
 
             if dgamma is not None and l < self.num_layers-1:
-                grads[f'gamma{l+1}'] = dgamma
-                grads[f'beta{l+1}'] = dbeta
+                grads[f"gamma{l+1}"] = dgamma
+                grads[f"beta{l+1}"] = dbeta
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

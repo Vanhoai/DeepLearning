@@ -176,7 +176,7 @@ def load_tiny_imagenet(path, dtype=np.float32, subtract_mean=True):
             X_val[i] = img.transpose(2, 0, 1)
 
     # Next load test images
-    # Students won't have test labels, so we need to iterate over files in the
+    # Students won"t have test labels, so we need to iterate over files in the
     # images directory.
     img_files = os.listdir(os.path.join(path, "test", "images"))
     X_test = np.zeros((len(img_files), 3, 64, 64), dtype=dtype)
@@ -225,7 +225,7 @@ def load_models(models_dir):
 
     Inputs:
     - models_dir: String giving the path to a directory containing model files.
-      Each model file is a pickled dictionary with a 'model' field.
+      Each model file is a pickled dictionary with a "model" field.
 
     Returns:
     A dictionary mapping model file names to models.

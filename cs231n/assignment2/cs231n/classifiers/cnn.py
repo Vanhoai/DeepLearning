@@ -52,8 +52,8 @@ class ThreeLayerConvNet(object):
         # with standard deviation equal to weight_scale; biases should be          #
         # initialized to zero. All weights and biases should be stored in the      #
         #  dictionary self.params. Store weights and biases for the convolutional  #
-        # layer using the keys 'W1' and 'b1'; use keys 'W2' and 'b2' for the       #
-        # weights and biases of the hidden affine layer, and keys 'W3' and 'b3'    #
+        # layer using the keys "W1" and "b1"; use keys "W2" and "b2" for the       #
+        # weights and biases of the hidden affine layer, and keys "W3" and "b3"    #
         # for the weights and biases of the output affine layer.                   #
         #                                                                          #
         # IMPORTANT: For this assignment, you can assume that the padding          #
@@ -66,12 +66,12 @@ class ThreeLayerConvNet(object):
         F, (C, H, W) = num_filters, input_dim # dim size
 
         self.params.update({
-            'W1': np.random.randn(F, C, filter_size, filter_size) * weight_scale, # consider all filter shapes
-            'b1': np.zeros(num_filters),                                          # consider number of filters
-            'W2': np.random.randn(F * H * W // 4, hidden_dim) * weight_scale,     # consider reduced pool output
-            'b2': np.zeros(hidden_dim),                                           # consider number of hidden nodes
-            'W3': np.random.randn(hidden_dim, num_classes) * weight_scale,        # consider hiddden and output nodes
-            'b3': np.zeros(num_classes),                                          # consider output nodes
+            "W1": np.random.randn(F, C, filter_size, filter_size) * weight_scale, # consider all filter shapes
+            "b1": np.zeros(num_filters),                                          # consider number of filters
+            "W2": np.random.randn(F * H * W // 4, hidden_dim) * weight_scale,     # consider reduced pool output
+            "b2": np.zeros(hidden_dim),                                           # consider number of hidden nodes
+            "W3": np.random.randn(hidden_dim, num_classes) * weight_scale,        # consider hiddden and output nodes
+            "b3": np.zeros(num_classes),                                          # consider output nodes
         })
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -128,7 +128,7 @@ class ThreeLayerConvNet(object):
         # TODO: Implement the backward pass for the three-layer convolutional net, #
         # storing the loss and gradients in the loss and grads variables. Compute  #
         # data loss using softmax, and make sure that grads[k] holds the gradients #
-        # for self.params[k]. Don't forget to add L2 regularization!               #
+        # for self.params[k]. Don"t forget to add L2 regularization!               #
         #                                                                          #
         # NOTE: To ensure that your implementation matches ours and you pass the   #
         # automated tests, make sure that your L2 regularization includes a factor #
@@ -139,13 +139,13 @@ class ThreeLayerConvNet(object):
         loss, dout = softmax_loss(scores, y)                                     # loss and dout
         loss += 0.5 * self.reg * (np.sum(W1**2) + np.sum(W2**2) + np.sum(W3**2)) # regularized loss
 
-        dout, grads['W3'], grads['b3'], _, _ = generic_backward(dout, cache3)    # first backward pass
-        dout, grads['W2'], grads['b2'], = affine_relu_backward(dout, cache2)     # FC backward pass
-        dout, grads['W1'], grads['b1'], = conv_relu_pool_backward(dout, cache1)  # CONV backward pass
+        dout, grads["W3"], grads["b3"], _, _ = generic_backward(dout, cache3)    # first backward pass
+        dout, grads["W2"], grads["b2"], = affine_relu_backward(dout, cache2)     # FC backward pass
+        dout, grads["W1"], grads["b1"], = conv_relu_pool_backward(dout, cache1)  # CONV backward pass
 
-        grads['W3'] += self.reg * W3 # L2 for W3
-        grads['W2'] += self.reg * W2 # L2 for W2
-        grads['W1'] += self.reg * W1 # L2 for W1
+        grads["W3"] += self.reg * W3 # L2 for W3
+        grads["W2"] += self.reg * W2 # L2 for W2
+        grads["W1"] += self.reg * W1 # L2 for W1
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

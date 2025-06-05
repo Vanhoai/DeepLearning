@@ -183,7 +183,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     - gamma: Scale parameter of shape (D,)
     - beta: Shift paremeter of shape (D,)
     - bn_param: Dictionary with the following keys:
-      - mode: 'train' or 'test'; required
+      - mode: "train" or "test"; required
       - eps: Constant for numeric stability
       - momentum: Constant for running mean / variance.
       - running_mean: Array of shape (D,) giving running mean of features
@@ -232,8 +232,8 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         x_hat = (x - mu) / std     # standartized x
         out = gamma * x_hat + beta # scaled and shifted x_hat
 
-        shape = bn_param.get('shape', (N, D))              # reshape used in backprop
-        axis = bn_param.get('axis', 0)                     # axis to sum used in backprop
+        shape = bn_param.get("shape", (N, D))              # reshape used in backprop
+        axis = bn_param.get("axis", 0)                     # axis to sum used in backprop
         cache = x, mu, var, std, gamma, x_hat, shape, axis # save for backprop
 
         if axis == 0:                                                    # if not batchnorm
@@ -261,7 +261,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         #                          END OF YOUR CODE                           #
         #######################################################################
     else:
-        raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
+        raise ValueError("Invalid forward batchnorm mode "%s"" % mode)
 
     # Store the updated running means back into bn_param
     bn_param["running_mean"] = running_mean
@@ -299,8 +299,8 @@ def batchnorm_backward(dout, cache):
 
     x, mu, var, std, gamma, x_hat, shape, axis = cache          # expand cache
 
-    dbeta = dout.reshape(shape, order='F').sum(axis)            # derivative w.r.t. beta
-    dgamma = (dout * x_hat).reshape(shape, order='F').sum(axis) # derivative w.r.t. gamma
+    dbeta = dout.reshape(shape, order="F").sum(axis)            # derivative w.r.t. beta
+    dgamma = (dout * x_hat).reshape(shape, order="F").sum(axis) # derivative w.r.t. gamma
 
     dx_hat = dout * gamma                                       # derivative w.t.r. x_hat
     dstd = -np.sum(dx_hat * (x-mu), axis=0) / (std**2)          # derivative w.t.r. std
@@ -345,8 +345,8 @@ def batchnorm_backward_alt(dout, cache):
     _, _, _, std, gamma, x_hat, shape, axis = cache # expand cache
     S = lambda x: x.sum(axis=0)                     # helper function
     
-    dbeta = dout.reshape(shape, order='F').sum(axis)            # derivative w.r.t. beta
-    dgamma = (dout * x_hat).reshape(shape, order='F').sum(axis) # derivative w.r.t. gamma
+    dbeta = dout.reshape(shape, order="F").sum(axis)            # derivative w.r.t. beta
+    dgamma = (dout * x_hat).reshape(shape, order="F").sum(axis) # derivative w.r.t. gamma
     
     dx = dout * gamma / (len(dout) * std)          # temporarily initialize scale value
     dx = len(dout)*dx  - S(dx*x_hat)*x_hat - S(dx) # derivative w.r.t. unnormalized x
@@ -410,7 +410,7 @@ def layernorm_forward(x, gamma, beta, ln_param):
 def layernorm_backward(dout, cache):
     """Backward pass for layer normalization.
 
-    For this implementation, you can heavily rely on the work you've done already
+    For this implementation, you can heavily rely on the work you"ve done already
     for batch normalization.
 
     Inputs:
@@ -454,7 +454,7 @@ def dropout_forward(x, dropout_param):
     - x: Input data, of any shape
     - dropout_param: A dictionary with the following keys:
       - p: Dropout parameter. We keep each neuron output with probability p.
-      - mode: 'test' or 'train'. If the mode is train, then perform dropout;
+      - mode: "test" or "train". If the mode is train, then perform dropout;
         if the mode is test, then just return the input.
       - seed: Seed for the random number generator. Passing seed makes this
         function deterministic, which is needed for gradient checking but not
@@ -545,18 +545,18 @@ def conv_forward_naive(x, w, b, conv_param):
     - w: Filter weights of shape (F, C, HH, WW)
     - b: Biases, of shape (F,)
     - conv_param: A dictionary with the following keys:
-      - 'stride': The number of pixels between adjacent receptive fields in the
+      - "stride": The number of pixels between adjacent receptive fields in the
         horizontal and vertical directions.
-      - 'pad': The number of pixels that will be used to zero-pad the input.
+      - "pad": The number of pixels that will be used to zero-pad the input.
 
-    During padding, 'pad' zeros should be placed symmetrically (i.e equally on both sides)
+    During padding, "pad" zeros should be placed symmetrically (i.e equally on both sides)
     along the height and width axes of the input. Be careful not to modfiy the original
     input x directly.
 
     Returns a tuple of:
-    - out: Output data, of shape (N, F, H', W') where H' and W' are given by
-      H' = 1 + (H + 2 * pad - HH) / stride
-      W' = 1 + (W + 2 * pad - WW) / stride
+    - out: Output data, of shape (N, F, H", W") where H" and W" are given by
+      H" = 1 + (H + 2 * pad - HH) / stride
+      W" = 1 + (W + 2 * pad - WW) / stride
     - cache: (x, w, b, conv_param)
     """
     out = None
@@ -566,8 +566,8 @@ def conv_forward_naive(x, w, b, conv_param):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    P1 = P2 = P3 = P4 = conv_param['pad'] # padding: up = right = down = left
-    S1 = S2 = conv_param['stride']        # stride:  up = down
+    P1 = P2 = P3 = P4 = conv_param["pad"] # padding: up = right = down = left
+    S1 = S2 = conv_param["stride"]        # stride:  up = down
     N, C, HI, WI = x.shape                # input dims  
     F, _, HF, WF = w.shape                # filter dims
     HO = 1 + (HI + P1 + P3 - HF) // S1    # output height      
@@ -577,7 +577,7 @@ def conv_forward_naive(x, w, b, conv_param):
     to_fields = lambda x: np.lib.stride_tricks.sliding_window_view(x, (WF,HF,C,N))
 
     w_row = w.reshape(F, -1)                                            # weights as rows
-    x_pad = np.pad(x, ((0,0), (0,0), (P1, P3), (P2, P4)), 'constant')   # padded inputs
+    x_pad = np.pad(x, ((0,0), (0,0), (P1, P3), (P2, P4)), "constant")   # padded inputs
     x_col = to_fields(x_pad.T).T[...,::S1,::S2].reshape(N, C*HF*WF, -1) # inputs as cols
 
     out = (w_row @ x_col).reshape(N, F, HO, WO) + np.expand_dims(b, axis=(2,1))
@@ -614,22 +614,22 @@ def conv_backward_naive(dout, cache):
     to_fields = np.lib.stride_tricks.sliding_window_view
 
     x_pad, w, b, conv_param = cache       # extract parameters from cache
-    S1 = S2 = conv_param['stride']        # stride:  up = down
-    P1 = P2 = P3 = P4 = conv_param['pad'] # padding: up = right = down = left
+    S1 = S2 = conv_param["stride"]        # stride:  up = down
+    P1 = P2 = P3 = P4 = conv_param["pad"] # padding: up = right = down = left
     F, C, HF, WF = w.shape                # filter dims
     N, _, HO, WO = dout.shape             # output dims
     
     dout = np.insert(dout, [*range(1, HO)] * (S1-1), 0, axis=2)         # "missing" rows
     dout = np.insert(dout, [*range(1, WO)] * (S2-1), 0, axis=3)         # "missing" columns
-    dout_pad = np.pad(dout, ((0,), (0,), (HF-1,), (WF-1,)), 'constant') # for full convolution
+    dout_pad = np.pad(dout, ((0,), (0,), (HF-1,), (WF-1,)), "constant") # for full convolution
 
     x_fields = to_fields(x_pad, (N, C, dout.shape[2], dout.shape[3]))   # input local regions w.r.t. dout
     dout_fields = to_fields(dout_pad, (N, F, HF, WF))                   # dout local regions w.r.t. filter 
     w_rot = np.rot90(w, 2, axes=(2, 3))                                 # rotated kernel (for convolution)
 
-    db = np.einsum('ijkl->j', dout)                                                # sum over
-    dw = np.einsum('ijkl,mnopiqkl->jqop', dout, x_fields)                          # correlate
-    dx = np.einsum('ijkl,mnopqikl->qjop', w_rot, dout_fields)[..., P1:-P3, P2:-P4] # convolve
+    db = np.einsum("ijkl->j", dout)                                                # sum over
+    dw = np.einsum("ijkl,mnopiqkl->jqop", dout, x_fields)                          # correlate
+    dx = np.einsum("ijkl,mnopqikl->qjop", w_rot, dout_fields)[..., P1:-P3, P2:-P4] # convolve
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -644,7 +644,7 @@ def max_pool_forward_naive(x, pool_param):
     Inputs:
     - x: Input data, of shape (N, C, H, W)
     - pool_param: dictionary with the following keys:
-      - 'pool_height': The height of each pooling region
+      - "pool_height": The height of each pooling region
       - 'pool_width': The width of each pooling region
       - 'stride': The distance between adjacent pooling regions
 

@@ -62,7 +62,7 @@ It is advised to run in [Colab](https://colab.research.google.com/), however, yo
    %cd ..
    ```
 
-I've gathered all the requirements for all 3 assignments into one file [requirements.txt](requirements.txt) so there is no need to additionally install the requirements specified under each assignment folder. If you plan to complete [TensorFlow.ipynb](assignment2/TensorFlow.ipynb), then you also need to additionally install [Tensorflow](https://www.tensorflow.org/install).
+I"ve gathered all the requirements for all 3 assignments into one file [requirements.txt](requirements.txt) so there is no need to additionally install the requirements specified under each assignment folder. If you plan to complete [TensorFlow.ipynb](assignment2/TensorFlow.ipynb), then you also need to additionally install [Tensorflow](https://www.tensorflow.org/install).
 
 
 > **Note**: to use MPS acceleration via Apple M1, see the comment in [#4](https://github.com/mantasu/cs231n/issues/4#issuecomment-1492202538).
@@ -92,7 +92,7 @@ $$f(x)=\max(0, x),\ \text{ where } x=\hat{y}_i-\hat{y}_c+\Delta$$
 </sub>
 
 <sub>
-Let's now see how our $\max$ function fits the definition of computing the gradient. It is the formula we use for computing the gradient <i>numerically</i> when, instead of implementing the limit approaching to $0$, we choose some arbitrary small $h$:
+Let"s now see how our $\max$ function fits the definition of computing the gradient. It is the formula we use for computing the gradient <i>numerically</i> when, instead of implementing the limit approaching to $0$, we choose some arbitrary small $h$:
 </sub>
 
 <sub>
@@ -132,18 +132,18 @@ def conv_forward_naive(x, w, b, conv_param):
     - w: Filter weights of shape (F, C, HH, WW)
     - b: Biases, of shape (F,)
     - conv_param: A dictionary with the following keys:
-      - 'stride': The number of pixels between adjacent receptive fields in the
+      - "stride": The number of pixels between adjacent receptive fields in the
         horizontal and vertical directions.
-      - 'pad': The number of pixels that will be used to zero-pad the input.
+      - "pad": The number of pixels that will be used to zero-pad the input.
 
-    During padding, 'pad' zeros should be placed symmetrically (i.e equally on both sides)
+    During padding, "pad" zeros should be placed symmetrically (i.e equally on both sides)
     along the height and width axes of the input. Be careful not to modfiy the original
     input x directly.
 
     Returns a tuple of:
-    - out: Output data, of shape (N, F, H', W') where H' and W' are given by
-      H' = 1 + (H + 2 * pad - HH) / stride
-      W' = 1 + (W + 2 * pad - WW) / stride
+    - out: Output data, of shape (N, F, H", W") where H" and W" are given by
+      H" = 1 + (H + 2 * pad - HH) / stride
+      W" = 1 + (W + 2 * pad - WW) / stride
     - cache: (x, w, b, conv_param)
     """
     out = None
@@ -153,8 +153,8 @@ def conv_forward_naive(x, w, b, conv_param):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    P1 = P2 = P3 = P4 = conv_param['pad'] # padding: up = right = down = left
-    S1 = S2 = conv_param['stride']        # stride:  up = down
+    P1 = P2 = P3 = P4 = conv_param["pad"] # padding: up = right = down = left
+    S1 = S2 = conv_param["stride"]        # stride:  up = down
     N, C, HI, WI = x.shape                # input dims  
     F, _, HF, WF = w.shape                # filter dims
     HO = 1 + (HI + P1 + P3 - HF) // S1    # output height      
@@ -164,7 +164,7 @@ def conv_forward_naive(x, w, b, conv_param):
     to_fields = lambda x: np.lib.stride_tricks.sliding_window_view(x, (WF,HF,C,N))
 
     w_row = w.reshape(F, -1)                                            # weights as rows
-    x_pad = np.pad(x, ((0,0), (0,0), (P1, P3), (P2, P4)), 'constant')   # padded inputs
+    x_pad = np.pad(x, ((0,0), (0,0), (P1, P3), (P2, P4)), "constant")   # padded inputs
     x_col = to_fields(x_pad.T).T[...,::S1,::S2].reshape(N, C*HF*WF, -1) # inputs as cols
 
     out = (w_row @ x_col).reshape(N, F, HO, WO) + np.expand_dims(b, axis=(2,1))

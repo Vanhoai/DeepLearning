@@ -1,59 +1,53 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from datasets import datasets
+from neural_network import NeuralNetwork
+
+N = 10000  # Total number of samples
+classes = 4  # Number of classes
+d = 2  # Dimensions
+
+def train_test_split():
+    # Load datasets
+    X_data, Y_data = datasets(N, classes, d)
+
+    # Train test split
+    T = int(0.2 * N)
+    XTest, YTest = X_data[:T], Y_data[:T]
+    XTrain, YTrain = X_data[T:], Y_data[T:]
+
+    assert XTest.shape == (T, d)
+    assert YTest.shape == (T, classes)
+
+    assert XTrain.shape == (N - T, d)
+    assert YTrain.shape == (N - T, classes)
+
+    return XTrain, YTrain, XTest, YTest
+
+def plot_data(XTrain, YTrain, XTest, YTest):
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    axs[0].scatter(XTrain[:, 0], XTrain[:, 1], c=np.argmax(YTrain, axis=1), cmap='viridis', s=10)
+    axs[0].set_title('Training Data')
+    axs[0].set_xlabel('X')
+    axs[0].set_ylabel('Y')
+    axs[1].scatter(XTest[:, 0], XTest[:, 1], c=np.argmax(YTest, axis=1), cmap='viridis', s=10)
+    axs[1].set_title('Test Data')
+    axs[1].set_xlabel('X')
+    axs[1].set_ylabel('Y')
+
+    plt.tight_layout()
+    plt.show()
 
 
-def relu(x):
-    return np.maximum(0, x)
+if __name__ == "__main__":
+    X_train, Y_train, X_test, Y_test = train_test_split()
+    nn = NeuralNetwork(learning_rate=1e-3)
+    nn.fit(X_train, Y_train, epochs=10000)
+
+    # Evaluate the model
+    predictions = nn.predict(X_test)  # One-hot encoded predictions
+    accuracy = nn.compute_accuracy(Y_test, predictions)
+    print(f"Test Accuracy: {accuracy:.4f}")
 
 
-def softmax(x):
-    exp = np.exp(x - np.max(x, axis=0, keepdims=True))
-    return exp / np.sum(exp, axis=0, keepdims=True)
 
-
-def relu_derivative(x):
-    return np.where(x > 0, 1, 0)
-
-
-N = 1000
-d = 2
-
-np.random.seed(5)
-X = np.random.randn(d, N)
-A0 = X
-
-# feedforward
-W1 = np.random.randn(2, 2)
-W2 = np.random.randn(2, 2)
-b1 = np.zeros((2, 1))
-b2 = np.zeros((2, 1))
-
-Z1 = W1.T @ A0 + b1 # R(2x1000)
-A1 = relu(Z1)       # R(2x1000)
-
-Z2 = W2.T @ A1 + b2
-A2 = softmax(Z2)
-
-# backpropagation
-y = np.random.randint(0, 2, N)
-Y = np.eye(2)[y].T
-
-dZ2 = A2 - Y # R(2x1000)
-
-dW2 = A1 @ dZ2.T / N
-db2 = np.sum(dZ2, axis=1, keepdims=True) / N
-
-dA1 = W2 @ dZ2
-dZ1 = dA1 * relu_derivative(Z1)
-dW1 = A0 @ dZ1.T / N
-db1 = np.sum(dZ1, axis=1, keepdims=True) / N
-
-# update weights
-lr = 0.001
-
-W2 = W2 - lr * dW2
-W1 = W1 - lr * dW1
-b2 = b2 - lr * db2
-b1 = b1 - lr * db1
-
-print(W2)
-print(W1)

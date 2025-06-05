@@ -37,7 +37,7 @@ class Dense(Layer):
         self._db = None
 
     def __repr__(self):
-        return f"Dense(units={self._units}) with weights shape {self._weights.shape if self._weights is not None else 'None'} and bias shape {self._bias.shape if self._bias is not None else 'None'}"
+        return f"Dense(units={self._units}) with weights shape {self._weights.shape if self._weights is not None else "None"} and bias shape {self._bias.shape if self._bias is not None else "None"}"
 
     @property
     def weights(self):

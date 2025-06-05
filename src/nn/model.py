@@ -64,9 +64,9 @@ class NeuralNetwork(Model):
         for index in reversed(range(self._num_layers)):
             layer, activation = self._layers[index]
 
-            # da: dJ / da = f'(loss)
-            # dz: dJ / dz = dJ / da * da / dz = f'(loss) * f'(activation)
-            # dw: dJ / dw = dJ / dz * dz / dw = f'(loss) * f'(activation) * a(l - 1)
+            # da: dJ / da = f"(loss)
+            # dz: dJ / dz = dJ / da * da / dz = f"(loss) * f"(activation)
+            # dw: dJ / dw = dJ / dz * dz / dw = f"(loss) * f"(activation) * a(l - 1)
             dz = np.multiply(da, activation.gradient(layer.output))
 
             a_prev = None

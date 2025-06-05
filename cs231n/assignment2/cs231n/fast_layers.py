@@ -47,8 +47,8 @@ def conv_forward_strides(x, w, b, conv_param):
     stride, pad = conv_param["stride"], conv_param["pad"]
 
     # Check dimensions
-    # assert (W + 2 * pad - WW) % stride == 0, 'width does not work'
-    # assert (H + 2 * pad - HH) % stride == 0, 'height does not work'
+    # assert (W + 2 * pad - WW) % stride == 0, "width does not work"
+    # assert (H + 2 * pad - HH) % stride == 0, "height does not work"
 
     # Pad the input
     p = pad
@@ -76,8 +76,8 @@ def conv_forward_strides(x, w, b, conv_param):
     out = res.transpose(1, 0, 2, 3)
 
     # Be nice and return a contiguous array
-    # The old version of conv_forward_fast doesn't do this, so for a fair
-    # comparison we won't either
+    # The old version of conv_forward_fast doesn"t do this, so for a fair
+    # comparison we won"t either
     out = np.ascontiguousarray(out)
 
     cache = (x, w, b, conv_param, x_cols)
@@ -176,7 +176,7 @@ def max_pool_backward_fast(dout, cache):
     elif method == "im2col":
         return max_pool_backward_im2col(dout, real_cache)
     else:
-        raise ValueError('Unrecognized method "%s"' % method)
+        raise ValueError("Unrecognized method "%s"" % method)
 
 
 def max_pool_forward_reshape(x, pool_param):
@@ -212,11 +212,11 @@ def max_pool_backward_reshape(dout, cache):
     NOTE: If there are multiple argmaxes, this method will assign gradient to
     ALL argmax elements of the input rather than picking one. In this case the
     gradient will actually be incorrect. However this is unlikely to occur in
-    practice, so it shouldn't matter much. One possible solution is to split the
+    practice, so it shouldn"t matter much. One possible solution is to split the
     upstream gradient equally among all argmax elements; this should result in a
     valid subgradient. You can make this happen by uncommenting the line below;
     however this results in a significant performance penalty (about 40% slower)
-    and is unlikely to matter in practice so we don't do it.
+    and is unlikely to matter in practice so we don"t do it.
     """
     x, x_reshaped, out = cache
 
@@ -236,7 +236,7 @@ def max_pool_forward_im2col(x, pool_param):
     """
     An implementation of the forward pass for max pooling based on im2col.
 
-    This isn't much faster than the naive version, so it should be avoided if
+    This isn"t much faster than the naive version, so it should be avoided if
     possible.
     """
     N, C, H, W = x.shape
@@ -263,7 +263,7 @@ def max_pool_backward_im2col(dout, cache):
     """
     An implementation of the backward pass for max pooling based on im2col.
 
-    This isn't much faster than the naive version, so it should be avoided if
+    This isn"t much faster than the naive version, so it should be avoided if
     possible.
     """
     x, x_cols, x_cols_argmax, pool_param = cache

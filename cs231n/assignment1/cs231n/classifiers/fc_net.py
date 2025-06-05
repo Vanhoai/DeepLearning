@@ -50,16 +50,16 @@ class TwoLayerNet(object):
         # standard deviation equal to weight_scale, and biases should be           #
         # initialized to zero. All weights and biases should be stored in the      #
         # dictionary self.params, with first layer weights                         #
-        # and biases using the keys 'W1' and 'b1' and second layer                 #
-        # weights and biases using the keys 'W2' and 'b2'.                         #
+        # and biases using the keys "W1" and "b1" and second layer                 #
+        # weights and biases using the keys "W2" and "b2".                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
         self.params = {
-          'W1': np.random.randn(input_dim, hidden_dim) * weight_scale,
-          'b1': np.zeros(hidden_dim),
-          'W2': np.random.randn(hidden_dim, num_classes) * weight_scale,
-          'b2': np.zeros(num_classes)
+          "W1": np.random.randn(input_dim, hidden_dim) * weight_scale,
+          "b1": np.zeros(hidden_dim),
+          "W2": np.random.randn(hidden_dim, num_classes) * weight_scale,
+          "b2": np.zeros(num_classes)
         }
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -113,7 +113,7 @@ class TwoLayerNet(object):
         # TODO: Implement the backward pass for the two-layer net. Store the loss  #
         # in the loss variable and gradients in the grads dictionary. Compute data #
         # loss using softmax, and make sure that grads[k] holds the gradients for  #
-        # self.params[k]. Don't forget to add L2 regularization!                   #
+        # self.params[k]. Don"t forget to add L2 regularization!                   #
         #                                                                          #
         # NOTE: To ensure that your implementation matches ours and you pass the   #
         # automated tests, make sure that your L2 regularization includes a factor #
@@ -131,7 +131,7 @@ class TwoLayerNet(object):
         dW1 += self.reg * W1
         dW2 += self.reg * W2
 
-        grads = {'W1': dW1, 'b1': db1, 'W2': dW2, 'b2': db2}
+        grads = {"W1": dW1, "b1": db1, "W2": dW2, "b2": db2}
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
