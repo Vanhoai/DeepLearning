@@ -147,13 +147,3 @@ class NeuralNetwork:
         """
         A2 = self.forward(X)
         return A2
-
-
-
-
-
-
-
-
-
-

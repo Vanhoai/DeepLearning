@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from datasets import datasets
-from neural_network import NeuralNetwork
+from modern_neural_network import ModernNeuralNetwork, ReLU, Softmax, CrossEntropyLoss
 
 N = 10000  # Total number of samples
 classes = 4  # Number of classes
 d = 2  # Dimensions
+
 
 def train_test_split():
     # Load datasets
@@ -24,6 +25,7 @@ def train_test_split():
 
     return XTrain, YTrain, XTest, YTest
 
+
 def plot_data(XTrain, YTrain, XTest, YTest):
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
     axs[0].scatter(XTrain[:, 0], XTrain[:, 1], c=np.argmax(YTrain, axis=1), cmap='viridis', s=10)
@@ -41,13 +43,13 @@ def plot_data(XTrain, YTrain, XTest, YTest):
 
 if __name__ == "__main__":
     X_train, Y_train, X_test, Y_test = train_test_split()
-    nn = NeuralNetwork(learning_rate=1e-3)
-    nn.fit(X_train, Y_train, epochs=10000)
+    nn = ModernNeuralNetwork(
+        layers=[(2, ReLU()), (5, ReLU()), (4, Softmax())],
+        loss=CrossEntropyLoss(),
+        eta=1e-2
+    )
+    nn.fit(X_train, Y_train)
 
-    # Evaluate the model
-    predictions = nn.predict(X_test)  # One-hot encoded predictions
-    accuracy = nn.compute_accuracy(Y_test, predictions)
-    print(f"Test Accuracy: {accuracy:.4f}")
-
-
-
+    A = nn.predict(X_test)
+    accuracy = nn.compute_accuracy(Y_test, A)
+    print(f"accuracy: {accuracy:.4f}")
