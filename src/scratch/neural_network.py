@@ -1,10 +1,13 @@
 import numpy as np
 
+
 def relu(X):
     return np.maximum(0, X)
 
+
 def relu_derivative(X):
     return np.where(X > 0, 1, 0)
+
 
 def softmax(Z):
     """
@@ -19,12 +22,14 @@ def softmax(Z):
     exp = np.exp(Z - np.max(Z, axis=1, keepdims=True))
     return exp / exp.sum(axis=1, keepdims=True)
 
+
 def cross_entropy_loss(Y_true, Y_pred):
     # Y_true:  R(N X d)
     # Y_pred:  R(N X d)
     epsilon = 1e-15
     Y_pred = np.clip(Y_pred, epsilon, 1 - epsilon)
-    return - np.mean(np.sum(Y_true * np.log(Y_pred), axis=1))
+    return -np.mean(np.sum(Y_true * np.log(Y_pred), axis=1))
+
 
 class NeuralNetwork:
     def __init__(self, learning_rate=1e-3):
@@ -98,15 +103,23 @@ class NeuralNetwork:
 
         N = Y.shape[0]
         # Layer 2
-        dZ2 = self.A2 - Y                           # (1000, 4)
-        dW2 = self.A1.T @ dZ2 / N                   # (5 X 1000) @ (1000 X 4) / 1000 = (5, 4)
-        db2 = np.mean(dZ2, axis=0, keepdims=True)   # Sum by column and keep dimensions: (1, 4)
+        dZ2 = self.A2 - Y  # (1000, 4)
+        dW2 = (
+            self.A1.T @ dZ2 / N  # type: ignore
+        )  # (5 X 1000) @ (1000 X 4) / 1000 = (5, 4)
+        db2 = np.mean(
+            dZ2, axis=0, keepdims=True
+        )  # Sum by column and keep dimensions: (1, 4)
 
         # Layer 1
-        dA1 = dZ2 @ self.W2.T                       # (1000, 4) @ (4, 5) = (1000, 5)
-        dZ1 = dA1 * relu_derivative(self.Z1)        # (1000, 5) * (1000, 5) = (1000, 5)
-        dW1 = self.A0.T @ dZ1 / N                   # (2 X 1000) @ (1000 X 5) / 1000 = (2, 5)
-        db1 = np.mean(dZ1, axis=0, keepdims=True)   # Sum by column and keep dimensions: (1, 5)
+        dA1 = dZ2 @ self.W2.T  # (1000, 4) @ (4, 5) = (1000, 5)
+        dZ1 = dA1 * relu_derivative(self.Z1)  # (1000, 5) * (1000, 5) = (1000, 5)
+        dW1 = (
+            self.A0.T @ dZ1 / N  # type: ignore
+        )  # (2 X 1000) @ (1000 X 5) / 1000 = (2, 5)
+        db1 = np.mean(
+            dZ1, axis=0, keepdims=True
+        )  # Sum by column and keep dimensions: (1, 5)
 
         # Update weights and biases
         self.W2 -= self.eta * dW2
@@ -117,13 +130,15 @@ class NeuralNetwork:
     def fit(self, X, Y, epochs=10000, verbose=True):
         for epoch in range(epochs):
             # Forward pass
-            A2 = self.forward(X)                    # R(1000, 4)
+            A2 = self.forward(X)  # R(1000, 4)
 
             # Compute loss
-            loss = cross_entropy_loss(Y, A2)        # Scalar value
+            loss = cross_entropy_loss(Y, A2)  # Scalar value
             if verbose and epoch % 1000 == 0:
                 accuracy = self.compute_accuracy(Y, A2)
-                print(f"Epoch {epoch + 1:5d}/{epochs}, Loss: {loss:.6f}, Accuracy: {accuracy:.4f}")
+                print(
+                    f"Epoch {epoch + 1:5d}/{epochs}, Loss: {loss:.6f}, Accuracy: {accuracy:.4f}"
+                )
 
             # Backward pass
             self.backpropagation(Y)

@@ -1,33 +1,35 @@
-import numpy as np
-from numpy.typing import NDArray
 from abc import ABC, abstractmethod
+import numpy as np
+from typing import Tuple
+from numpy.typing import NDArray
+from src.nn.layer import Layer
 
 
 class Optimizer(ABC):
-    def __init__(self, lr: float):
-        self._lr = lr
-
-    @property
-    def lr(self) -> float:
-        return self._lr
-
-    @lr.setter
-    def lr(self, lr: float):
-        self._lr = lr
+    def __init__(self, eta: float = 1e-3) -> None:
+        self.eta = eta
 
     @abstractmethod
-    def update_weights(self, layer, grad_weights): ...
-
-    @abstractmethod
-    def update_bias(self, layer, grad_bias): ...
+    def update(self, layer: Layer, dW: NDArray, db: NDArray) -> None:
+        layer.W -= self.eta * dW
+        layer.b -= self.eta * db
 
 
 class SGD(Optimizer):
-    def __init__(self, lr: float):
-        super().__init__(lr)
+    def __init__(
+        self,
+        eta: float = 1e-3,
+        momentum: float = 0.9,
+        nesterov: bool = True,
+        weight_decay: float = 0.0,
+    ) -> None:
+        super().__init__(eta)
 
-    def update_weights(self, layer, grad_weights):
-        layer.weights -= self._lr * grad_weights
+        # Momentum parameters
+        self.momentum = momentum
+        self.nesterov = nesterov
+        self.weight_decay = weight_decay
 
-    def update_bias(self, layer, grad_bias):
-        layer.bias -= self._lr * grad_bias
+    # FIXME: Implement Nesterov momentum later
+    def update(self, layer: Layer, dW: NDArray, db: NDArray) -> None:
+        super().update(layer, dW, db)

@@ -43,15 +43,15 @@ class Softmax(ActivationFunction):
         exp = np.exp(Z - np.max(Z, axis=1, keepdims=True))
         return exp / exp.sum(axis=1, keepdims=True)
 
-    def gradient(self, Z: NDArray) -> NDArray:
-        return np.ones_like(Z)
+    def gradient(self, x: NDArray) -> NDArray:
+        return np.ones_like(x)
 
 
 class ModernNeuralNetwork:
     """
     Initializes a modern neural network with specified layers and learning rate.
     Parameters:
-    @param layers: List layers, with each layer consist of nimber of units and activation function.
+    @param layers: List layers, with each layer consist of number of units and activation function.
                    Example: [(784, ReLU()), (128, ReLU()), (10, Softmax())]
     @param eta: Float representing the learning rate for the optimizer.
 
@@ -60,10 +60,7 @@ class ModernNeuralNetwork:
     """
 
     def __init__(
-            self,
-            layers: List[Tuple[int, ActivationFunction]],
-            loss: LossFunction,
-            eta=1e-3
+        self, layers: List[Tuple[int, ActivationFunction]], loss: LossFunction, eta=1e-3
     ):
         self.eta: float = eta
         self.layers: List[Tuple[int, ActivationFunction]] = layers
@@ -79,8 +76,8 @@ class ModernNeuralNetwork:
             di = layers[i][0]
             do = layers[i + 1][0]
 
-            W_ = np.random.randn(di, do) * np.sqrt(2.0 / di)
-            b_ = np.zeros((1, do))
+            W_ = (np.random.randn(di, do) * np.sqrt(2.0 / di)).astype(np.float32)
+            b_ = np.zeros((1, do), dtype=np.float32)
 
             self.W.append(W_)
             self.b.append(b_)
@@ -112,7 +109,7 @@ class ModernNeuralNetwork:
 
         for i in reversed(range(len(self.layers) - 1)):
             dZ = dA * self.layers[i + 1][1].gradient(Z[i])
-            dW[i] = A[i].T @ dZ / N
+            dW[i] = A[i].T @ dZ / N  # type: ignore
             db[i] = np.mean(dZ, axis=0, keepdims=True)
 
             # Prepare for the previous layer
@@ -137,21 +134,31 @@ class ModernNeuralNetwork:
         y_pred = np.argmax(Y_pred, axis=1)
         return np.mean(y_true == y_pred)
 
-    def fit(self, X: NDArray, Y: NDArray, epochs: int = 10000):
+    def fit(self, X: NDArray, Y: NDArray, epochs: int = 40, batch_size: int = 32):
         for epoch in range(epochs):
-            # feed forward
-            A_, Z_ = self.feed_forward(X)
-            if epoch % 1000 == 0:
-                loss = self.loss(Y, A_[-1])
-                accuracy = self.compute_accuracy(Y, A_[-1])
+            N = X.shape[0]
+            indices = np.arange(N)
+            np.random.shuffle(indices)
+            X_shuffled = X[indices]
+            Y_shuffled = Y[indices]
+
+            for start_idx in range(0, N, batch_size):
+                end_idx = min(start_idx + batch_size, N)
+                X_batch = X_shuffled[start_idx:end_idx]
+                Y_batch = Y_shuffled[start_idx:end_idx]
+
+                # Feedforward & Backpropagation in batch
+                A_, Z_ = self.feed_forward(X_batch)
+                dW, db = self.backpropagation(A_, Z_, Y_batch)
+
+                # Update weights and biases
+                for i in range(len(self.layers) - 1):
+                    self.W[i] -= self.eta * dW[i]  # type: ignore
+                    self.b[i] -= self.eta * db[i]  # type: ignore
+
+            # Logging after each epoch
+            if epoch % 5 == 0:
+                AF, _ = self.feed_forward(X)
+                loss = self.loss(Y, AF[-1])
+                accuracy = self.compute_accuracy(Y, AF[-1])
                 print(f"epoch: {epoch}, loss: {loss:.4f}, accuracy: {accuracy:.4f}")
-
-            # Backpropagation
-            dW, db = self.backpropagation(A_, Z_, Y)
-
-            # Update weights and biases
-            for i in range(len(self.layers) - 1):
-                # noinspection PyTypeChecker
-                self.W[i] -= self.eta * dW[i]
-                # noinspection PyTypeChecker
-                self.b[i] -= self.eta * db[i]

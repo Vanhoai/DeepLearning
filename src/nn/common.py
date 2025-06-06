@@ -1,6 +1,9 @@
+import numpy as np
 from abc import ABC, abstractmethod
 from typing import Any
+from numpy.typing import NDArray
 
-class Grad(ABC):
+
+class Gradient(ABC):
     @abstractmethod
-    def gradient(self, *args, **kwargs) -> Any: ...
+    def derivative(self, *args: Any, **kwds: Any) -> Any: ...

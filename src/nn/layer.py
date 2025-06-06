@@ -1,95 +1,77 @@
-from abc import ABC, abstractmethod
-from numpy.typing import NDArray
 import numpy as np
-from src.nn.optimizer import Optimizer
+from numpy.typing import NDArray
+from abc import ABC, abstractmethod
+from src.nn.activation import (
+    Activation,
+    ReLUActivation,
+    SigmoidActivation,
+    SoftmaxActivation,
+    ELUActivation,
+    TanhActivation,
+    LeakyReLUActivation,
+    LinearActivation,
+)
+from typing import Optional
 
 
 class Layer(ABC):
-    @property
-    @abstractmethod
-    def output(self): ...
+    def __init__(self, di: int, do: int, activation: Activation) -> None:
+        self.di = di
+        self.do = do
 
-    @property
-    @abstractmethod
-    def weights(self): ...
+        # Activation function, can be set later
+        self.activation: Activation = activation
 
-    @weights.setter
-    def weights(self, weights: NDArray): ...
+        # Initialize weights and biases
+        self.W = np.random.randn(di, do) * np.sqrt(2.0 / di)
+        self.b = np.zeros((1, do))
 
-    @abstractmethod
-    def forward(self, input_tensor: NDArray) -> NDArray: ...
+        self.Z: Optional[NDArray] = None  # Pre-activation output
+        self.A: Optional[NDArray] = None  # Post-activation output
+        self.dW: Optional[NDArray] = None  # Gradient of weights
+        self.db: Optional[NDArray] = None  # Gradient of biases
 
-    @abstractmethod
-    def build(self, input_tensor: NDArray): ...
+    def derivativeZ(self) -> NDArray:
+        assert self.Z is not None, "Z must be computed before calling derivativeZ"
+        return self.activation.derivative(self.Z)
 
-    @abstractmethod
-    def update(self, optimizer: Optimizer): ...
+    def forward(self, X: NDArray) -> NDArray:
+        self.Z = X @ self.W + self.b
+        self.A = self.activation(self.Z)  # type: ignore[return-value]
+        assert self.A is not None, "Activation output A must be computed"
+        return self.A
 
 
-class Dense(Layer):
-    def __init__(self, units: int):
-        self._units = units
-        self._input_units = None
-        self._weights = None
-        self._bias = None
-        self._output = None
-        self._dw = None
-        self._db = None
+class Linear(Layer):
+    def __init__(self, di: int, do: int) -> None:
+        super().__init__(di, do, LinearActivation())
 
-    def __repr__(self):
-        return f"Dense(units={self._units}) with weights shape {self._weights.shape if self._weights is not None else "None"} and bias shape {self._bias.shape if self._bias is not None else "None"}"
 
-    @property
-    def weights(self):
-        return self._weights
+class ReLu(Layer):
+    def __init__(self, di: int, do: int) -> None:
+        super().__init__(di, do, ReLUActivation())
 
-    @weights.setter
-    def weights(self, weights: NDArray):
-        self._weights = weights
 
-    @property
-    def bias(self):
-        return self._bias
+class Sigmoid(Layer):
+    def __init__(self, di: int, do: int) -> None:
+        super().__init__(di, do, SigmoidActivation())
 
-    @bias.setter
-    def bias(self, bias: NDArray):
-        self._bias = bias
 
-    @property
-    def dw(self):
-        return self._dw
+class Softmax(Layer):
+    def __init__(self, di: int, do: int) -> None:
+        super().__init__(di, do, SoftmaxActivation())
 
-    @dw.setter
-    def dw(self, gradients: NDArray):
-        self._dw = gradients
 
-    @property
-    def db(self):
-        return self._db
+class Tanh(Layer):
+    def __init__(self, di: int, do: int) -> None:
+        super().__init__(di, do, TanhActivation())
 
-    @db.setter
-    def db(self, gradients: NDArray):
-        self._db = gradients
 
-    @property
-    def output(self):
-        return self._output
+class ELU(Layer):
+    def __init__(self, di: int, do: int, alpha: float = 1.0) -> None:
+        super().__init__(di, do, ELUActivation(alpha))
 
-    def build(self, input_tensor: NDArray):
-        self._input_units = input_tensor.shape[0]
-        normalized = np.sqrt(2.0 / self._input_units)
-        self._weights = np.random.randn(self._input_units, self._units) * normalized
-        self._bias = np.zeros((self._units, 1))
 
-    # Weights:      R(l - 1 X l)
-    # Bias:         R(l X 1)
-    def forward(self, input_tensor: NDArray) -> NDArray:
-        if self._weights is None:
-            self.build(input_tensor)
-
-        self._output = self._weights.T @ input_tensor + self._bias
-        return self._output
-
-    def update(self, optimizer: Optimizer):
-        optimizer.update_weights(self, self.dw)
-        optimizer.update_bias(self, self.db)
+class LeakyReLU(Layer):
+    def __init__(self, di: int, do: int, alpha: float = 0.01) -> None:
+        super().__init__(di, do, LeakyReLUActivation(alpha))
