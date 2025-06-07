@@ -1,5 +1,6 @@
 import numpy as np
 from keras import datasets
+import matplotlib.pyplot as plt
 
 from src.nn.layer import ReLu, Softmax
 from src.nn.model import Sequential
@@ -7,10 +8,8 @@ from src.nn.loss import CrossEntropy
 from src.nn.optimizer import SGD
 
 
-def load_mnist_from_keras():
-    (XTrain, YTrain), (XTest, YTest) = datasets.mnist.load_data()
-    # XTrain: (60000, 28, 28)
-    # YTrain: (60000,)
+def load_fashion_mnist_from_keras():
+    (XTrain, YTrain), (XTest, YTest) = datasets.fashion_mnist.load_data()
 
     # Reshape and normalize the data
     XTrain = XTrain.reshape(XTrain.shape[0], -1) / 255.0  # Normalize and flatten
@@ -28,21 +27,53 @@ def load_mnist_from_keras():
     return XTrain, YTrain, XTest, YTest
 
 
+def plot_history(history):
+    plt.figure(figsize=(12, 5))
+
+    # Loss
+    plt.subplot(1, 2, 1)
+    plt.plot(history["loss"], label="Training Loss")
+    plt.plot(history["val_loss"], label="Validation Loss")
+    plt.title("Loss")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+
+    # Accuracy
+    plt.subplot(1, 2, 2)
+    plt.plot(history["accuracy"], label="Training Accuracy")
+    plt.plot(history["val_accuracy"], label="Validation Accuracy")
+    plt.title("Accuracy")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+
 if __name__ == "__main__":
-    X_train, Y_train, X_test, Y_test = load_mnist_from_keras()
+    X_train, Y_train, X_test, Y_test = load_fashion_mnist_from_keras()
 
-    d = 784  # Input dimension (28x28 images flattened)
-    classes = 10  # Number of classes (digits 0-9)
-    eta = 1e-3  # Learning rate
-    momentum = 0.9  # Momentum for SGD
-    nesterov = True  # Use Nesterov momentum
-    weight_decay = 0.0001  # Weight decay for regularization
-    regularization = 0.0001  # Regularization strength
+    # X = R(N, d)
+    # Y = R(N, classes)
+    # N = number of samples
+    N, d = X_train.shape
+    classes = Y_train.shape[1]
+    new_training = True
 
-    print(f"X_train shape: {X_train.shape}")
-    print(f"Y_train shape: {Y_train.shape}")
+    # Layer dimensions
+    d1 = 256
+    d2 = 128
 
-    layers = [ReLu(d, 256), ReLu(256, 128), Softmax(128, classes)]
+    # Hyperparameters
+    eta = 1e-1
+    momentum = 0.9
+    nesterov = True
+    weight_decay = 0.0001
+    regularization = 0.0001
+
+    layers = [ReLu(d, d1), ReLu(d1, d2), Softmax(d2, classes)]
     model = Sequential(
         layers=layers,
         loss=CrossEntropy(),
@@ -50,4 +81,11 @@ if __name__ == "__main__":
         regularization=regularization,
     )
 
-    model.fit(X_train, Y_train, epochs=20, batch_size=256)
+    if not new_training:
+        # Load the model from saved state
+        print("Loading model from saved state...")
+        model.load("./saved")
+
+    hist = model.fit(X_train, Y_train, epochs=20, batch_size=256)
+    plot_history(hist)
+    model.save("./saved")

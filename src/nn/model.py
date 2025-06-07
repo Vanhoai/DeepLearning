@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Tuple, List
 from numpy.typing import NDArray
 import numpy as np
+import os
 
 from src.nn.layer import Layer
 from src.nn.loss import Loss
@@ -22,7 +23,7 @@ class Model(ABC):
     def evaluate(self, Y: NDArray, A: NDArray) -> NDArray: ...
 
     @abstractmethod
-    def update(self) -> None: ...
+    def update_parameters(self) -> None: ...
 
     @abstractmethod
     def fit(
@@ -34,12 +35,14 @@ class Model(ABC):
         validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ) -> Dict[str, List[Any]]: ...
 
+    @abstractmethod
+    def load(self, path: str) -> None: ...
+
+    @abstractmethod
+    def save(self, path: str) -> None: ...
+
 
 class Sequential(Model):
-    """
-    X: R(N X D)
-    """
-
     def __init__(
         self,
         layers: List[Layer],
@@ -56,30 +59,30 @@ class Sequential(Model):
         self.N: Optional[int] = None
         self.input: Optional[NDArray] = None
         self.output: Optional[NDArray] = None
+        self.batch_size: int = 32
 
     def feedforward(self, X: NDArray) -> NDArray:
+        self.input = X
+
         O = X
         for L in self.layers:
             O = L.forward(O)
 
+        self.output = O
         return O
 
-    def backpropagation(self, Y: NDArray, batch_size: int = 32) -> None:
+    def backpropagation(self, Y: NDArray) -> None:
         assert self.output is not None, "Output must be computed before backpropagation"
 
         A = self.output  # output of the last layer
         dA = self.loss.derivative(Y, A)
-        # gradient of the loss with respect to the output
-        # layers = [ReLu(d, 512), ReLu(512, 128), ReLu(128, 64), Softmax(64, classes)]
-
-        dW = [None] * len(self.layers)
-        db = [None] * len(self.layers)
 
         for index in reversed(range(len(self.layers))):
             assert self.layers[index].Z is not None
 
             # if activation is None, derivativeZ will return 1, so it not affects the gradient
-            dZ = dA * self.layers[index].activation.derivative(self.layers[index].Z)  # type: ignore[assignment]
+            dA_dZ = self.layers[index].activation.derivative(self.layers[index].Z)  # type: ignore
+            dZ = dA * dA_dZ
 
             AP = None  # Post-activation output of the previous layer
             if index > 0:
@@ -88,16 +91,11 @@ class Sequential(Model):
                 AP = self.input
 
             assert AP is not None, "AP must be computed before backpropagation"
-            dW[index] = AP.T @ dZ / batch_size  # type: ignore[broadcasting numpy]
-            db[index] = np.mean(dZ, axis=0, keepdims=True)
+            self.layers[index].dW = AP.T @ dZ / self.batch_size  # type: ignore[broadcasting numpy]
+            self.layers[index].db = np.mean(dZ, axis=0, keepdims=True)
 
             if index > 0:
                 dA = dZ @ self.layers[index].W.T
-
-        eta = 1e-2  # Learning rate, can be set as a parameter
-        for i in range(len(self.layers)):
-            self.layers[i].W -= eta * dW[i]  # type: ignore
-            self.layers[i].b -= eta * db[i]  # type: ignore
 
     def predict(self, X: NDArray) -> NDArray:
         return self.feedforward(X)
@@ -110,7 +108,7 @@ class Sequential(Model):
         A = np.argmax(A, axis=1)
         return np.mean(Y == A)
 
-    def update(self) -> None:
+    def update_parameters(self) -> None:
         for layer in self.layers:
             # Apply regularization
             # if self.regularization > 0:
@@ -118,7 +116,36 @@ class Sequential(Model):
             # Update parameters using optimizer
             assert layer.dW is not None, "dW must be computed before update"
             assert layer.db is not None, "db must be computed before update"
-            self.optimizer.update(layer, layer.dW, layer.db)
+            # self.optimizer.update(layer, layer.dW, layer.db)
+
+            # Update the parameters of the model
+            eta = self.optimizer.eta
+            for layer in self.layers:
+                layer.W -= eta * layer.dW  # type: ignore
+                layer.b -= eta * layer.db  # type: ignore
+
+    def prepare_data(
+        self,
+        X: NDArray,
+        Y: NDArray,
+        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+    ):
+        # prepare validation data, if not provided => split 20% of the training data
+        if validation_data is None:
+            split_index = int(0.8 * X.shape[0])
+            X_train, Y_train = X[:split_index], Y[:split_index]
+            X_val, Y_val = X[split_index:], Y[split_index:]
+        else:
+            X_train, Y_train = X, Y
+            X_val, Y_val = validation_data
+
+        return X_train, Y_train, X_val, Y_val
+
+    def calculate_loss_accuracy(self, X: NDArray, Y: NDArray):
+        YA = self.predict(X)
+        loss = self.loss(Y, YA)
+        accuracy = self.evaluate(Y, YA)
+        return loss, accuracy
 
     def fit(
         self,
@@ -128,13 +155,24 @@ class Sequential(Model):
         batch_size: int = 32,
         validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ) -> Dict[str, List[Any]]:
-        self.N = X.shape[0]
+        # prepare training and validation data
+        X_train, Y_train, X_val, Y_val = self.prepare_data(X, Y, validation_data)
+        self.N = X_train.shape[0]
+        self.batch_size = batch_size
+
+        history: Dict[str, List[Any]] = {
+            "loss": [],
+            "accuracy": [],
+            "val_loss": [],
+            "val_accuracy": [],
+        }
+
         for epoch in range(epochs):
             # Shuffle the datasets
-            indices = np.arange(X.shape[0])
+            indices = np.arange(self.N)
             np.random.shuffle(indices)
-            X_shuffle = X[indices]
-            Y_shuffle = Y[indices]
+            X_shuffle = X_train[indices]
+            Y_shuffle = Y_train[indices]
 
             # Iterate over batches
             for start_batch in range(0, self.N, batch_size):
@@ -143,26 +181,40 @@ class Sequential(Model):
                 Y_batch = Y_shuffle[start_batch:end_batch]
 
                 # Feedforward & Backpropagation
-                self.input = X_batch
-                output = self.feedforward(X_batch)
-                self.output = output  # Store the output for backpropagation
-                self.backpropagation(Y_batch, batch_size)
-                # Update parameters of model
-                # self.update()
+                # Notice: input & output set into properties of the model in feedforward
+                self.feedforward(X_batch)
+                self.backpropagation(Y_batch)
 
-            # Calculate loss and accuracy for the current epoch
-            YA = self.predict(X)
-            loss = self.loss(Y, YA)
-            accuracy = self.evaluate(Y, YA)
-            msg = f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}, Accuracy: {accuracy:.4f}"
-            print(msg)
+                # Update the parameters of the model
+                self.update_parameters()
 
-        # return history of loss and accuracy of training and validation
-        history: Dict[str, List[Any]] = {
-            "loss": [],
-            "accuracy": [],
-            "val_loss": [],
-            "val_accuracy": [],
-        }
+            # Calculate loss and accuracy for training and validation data
+            loss, accuracy = self.calculate_loss_accuracy(X_train, Y_train)
+            val_loss, val_accuracy = self.calculate_loss_accuracy(X_val, Y_val)
+            history["loss"].append(loss)
+            history["accuracy"].append(accuracy)
+            history["val_loss"].append(val_loss)
+            history["val_accuracy"].append(val_accuracy)
+
+            print(
+                f"Epoch {epoch + 1}/{epochs} - "
+                f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f} - "
+                f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
+            )
 
         return history
+
+    def load(self, path: str = "./saved") -> None:
+        for i, layer in enumerate(self.layers):
+            w_path = f"{path}/layer_{i}_weights.npy"
+            b_path = f"{path}/layer_{i}_biases.npy"
+            if os.path.exists(w_path) and os.path.exists(b_path):
+                layer.W = np.load(w_path)
+                layer.b = np.load(b_path)
+            else:
+                print("Path does not exist or files are missing:", w_path, b_path)
+
+    def save(self, path: str = "./saved") -> None:
+        for i, layer in enumerate(self.layers):
+            np.save(f"{path}/layer_{i}_weights.npy", layer.W)
+            np.save(f"{path}/layer_{i}_biases.npy", layer.b)
