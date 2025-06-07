@@ -61,7 +61,7 @@ if __name__ == "__main__":
     # N = number of samples
     N, d = X_train.shape
     classes = Y_train.shape[1]
-    new_training = False
+    new_training = True
 
     # Layer dimensions
     d1 = 256

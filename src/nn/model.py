@@ -8,7 +8,11 @@ from src.nn.layer import Layer
 from src.nn.loss import Loss
 from src.nn.optimizer import Optimizer
 from src.nn.early_stopping import EarlyStopping
-from src.nn.regularization import RegularizationType, RegularizationFactory, Regularization
+from src.nn.regularization import (
+    RegularizationType,
+    RegularizationFactory,
+    Regularization,
+)
 
 
 class Model(ABC):
@@ -29,12 +33,12 @@ class Model(ABC):
 
     @abstractmethod
     def fit(
-            self,
-            X: NDArray,
-            Y: NDArray,
-            epochs: int = 100,
-            batch_size: int = 32,
-            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+        self,
+        X: NDArray,
+        Y: NDArray,
+        epochs: int = 100,
+        batch_size: int = 32,
+        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ) -> Dict[str, List[Any]]: ...
 
     @abstractmethod
@@ -46,12 +50,12 @@ class Model(ABC):
 
 class Sequential(Model):
     def __init__(
-            self,
-            layers: List[Layer],
-            loss: Loss,
-            optimizer: Optimizer,
-            regularization: Optional[RegularizationType] = None,
-            regularization_lambda: float = 1e-2,
+        self,
+        layers: List[Layer],
+        loss: Loss,
+        optimizer: Optimizer,
+        regularization: Optional[RegularizationType] = None,
+        regularization_lambda: float = 1e-2,
     ) -> None:
         self.layers = layers
         self.loss = loss
@@ -60,7 +64,9 @@ class Sequential(Model):
 
         # Regularization
         if regularization is not None:
-            self.regularization = RegularizationFactory.create(regularization, regularization_lambda)
+            self.regularization = RegularizationFactory.create(
+                regularization, regularization_lambda
+            )
         else:
             self.regularization = None
 
@@ -141,9 +147,9 @@ class Sequential(Model):
 
     @staticmethod
     def prepare_data(
-            X: NDArray,
-            Y: NDArray,
-            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+        X: NDArray,
+        Y: NDArray,
+        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ):
         # prepare validation data, if not provided => split 20% of the training data
         if validation_data is None:
@@ -166,18 +172,18 @@ class Sequential(Model):
             regularization_penalty = 0.0
             for layer in self.layers:
                 regularization_penalty += self.regularization.compute_penalty(layer.W)
-            return base_loss + regularization_penalty, accuracy
+            return base_loss + regularization_penalty, accuracy  # type: ignore
 
         return base_loss, accuracy
 
     def fit(
-            self,
-            X: NDArray,
-            Y: NDArray,
-            epochs: int = 50,
-            batch_size: int = 32,
-            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
-            early_stopping: Optional[EarlyStopping] = None,
+        self,
+        X: NDArray,
+        Y: NDArray,
+        epochs: int = 50,
+        batch_size: int = 32,
+        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+        early_stopping: Optional[EarlyStopping] = None,
     ) -> Dict[str, List[Any]]:
         # prepare training and validation data
         X_train, Y_train, X_val, Y_val = self.prepare_data(X, Y, validation_data)
@@ -231,18 +237,20 @@ class Sequential(Model):
                 W = [layer.W for layer in self.layers]
                 b = [layer.b for layer in self.layers]
 
+                # Check if early stopping condition is met
                 should_stop = early_stopping.on_epoch_end(
                     epoch=epoch,
-                    current_value=val_loss,
+                    current_value=val_loss,  # type: ignore
                     weights=W,
-                    bias=b
+                    bias=b,
                 )
+
                 if should_stop:
                     print(f"Early stopping at epoch {epoch + 1}")
                     if early_stopping.is_store:
                         for i, layer in enumerate(self.layers):
-                            layer.W = early_stopping.best_weights[i]
-                            layer.b = early_stopping.best_bias[i]
+                            layer.W = early_stopping.best_weights[i]  # type: ignore
+                            layer.b = early_stopping.best_bias[i]  # type: ignore
                     break
 
         return history
