@@ -6,6 +6,7 @@ from src.nn.layer import ReLu, Softmax
 from src.nn.model import Sequential
 from src.nn.loss import CrossEntropy
 from src.nn.optimizer import SGD
+from src.nn.early_stopping import EarlyStopping, MonitorEarlyStopping
 
 
 def load_fashion_mnist_from_keras():
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     # N = number of samples
     N, d = X_train.shape
     classes = Y_train.shape[1]
-    new_training = True
+    new_training = False
 
     # Layer dimensions
     d1 = 256
@@ -71,14 +72,15 @@ if __name__ == "__main__":
     momentum = 0.9
     nesterov = True
     weight_decay = 0.0001
-    regularization = 0.0001
+    regularization_lamda = 0.01
 
     layers = [ReLu(d, d1), ReLu(d1, d2), Softmax(d2, classes)]
     model = Sequential(
         layers=layers,
         loss=CrossEntropy(),
         optimizer=SGD(eta, momentum, nesterov, weight_decay),
-        regularization=regularization,
+        regularization=None,
+        regularization_lambda=regularization_lamda,
     )
 
     if not new_training:
@@ -86,6 +88,23 @@ if __name__ == "__main__":
         print("Loading model from saved state...")
         model.load("./saved")
 
-    hist = model.fit(X_train, Y_train, epochs=20, batch_size=256)
+    early_stopping = EarlyStopping(
+        patience=20,
+        min_delta=0.1,
+        monitor=MonitorEarlyStopping.VAL_ACCURACY,
+        is_store=True
+    )
+
+    hist = model.fit(
+        X_train,
+        Y_train,
+        epochs=30,
+        batch_size=256,
+        early_stopping=early_stopping,
+    )
     plot_history(hist)
     model.save("./saved")
+
+    # Evaluate the model on the test set
+    test_loss, test_accuracy = model.calculate_loss_accuracy(X_test, Y_test)
+    print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}")

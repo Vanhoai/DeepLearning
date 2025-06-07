@@ -7,6 +7,8 @@ import os
 from src.nn.layer import Layer
 from src.nn.loss import Loss
 from src.nn.optimizer import Optimizer
+from src.nn.early_stopping import EarlyStopping
+from src.nn.regularization import RegularizationType, RegularizationFactory, Regularization
 
 
 class Model(ABC):
@@ -27,12 +29,12 @@ class Model(ABC):
 
     @abstractmethod
     def fit(
-        self,
-        X: NDArray,
-        Y: NDArray,
-        epochs: int = 100,
-        batch_size: int = 32,
-        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+            self,
+            X: NDArray,
+            Y: NDArray,
+            epochs: int = 100,
+            batch_size: int = 32,
+            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ) -> Dict[str, List[Any]]: ...
 
     @abstractmethod
@@ -44,18 +46,25 @@ class Model(ABC):
 
 class Sequential(Model):
     def __init__(
-        self,
-        layers: List[Layer],
-        loss: Loss,
-        optimizer: Optimizer,
-        regularization: float = 0.0,
+            self,
+            layers: List[Layer],
+            loss: Loss,
+            optimizer: Optimizer,
+            regularization: Optional[RegularizationType] = None,
+            regularization_lambda: float = 1e-2,
     ) -> None:
         self.layers = layers
         self.loss = loss
         self.optimizer = optimizer
-        self.regularization = regularization
+        self.regularization: Optional[Regularization] = None
 
-        # Attributes will be update later
+        # Regularization
+        if regularization is not None:
+            self.regularization = RegularizationFactory.create(regularization, regularization_lambda)
+        else:
+            self.regularization = None
+
+        # Attributes will be updated later
         self.N: Optional[int] = None
         self.input: Optional[NDArray] = None
         self.output: Optional[NDArray] = None
@@ -80,8 +89,10 @@ class Sequential(Model):
         for index in reversed(range(len(self.layers))):
             assert self.layers[index].Z is not None
 
+            layer = self.layers[index]
+
             # if activation is None, derivativeZ will return 1, so it not affects the gradient
-            dA_dZ = self.layers[index].activation.derivative(self.layers[index].Z)  # type: ignore
+            dA_dZ = layer.activation.derivative(layer.Z)  # type: ignore
             dZ = dA * dA_dZ
 
             AP = None  # Post-activation output of the previous layer
@@ -91,17 +102,22 @@ class Sequential(Model):
                 AP = self.input
 
             assert AP is not None, "AP must be computed before backpropagation"
-            self.layers[index].dW = AP.T @ dZ / self.batch_size  # type: ignore[broadcasting numpy]
-            self.layers[index].db = np.mean(dZ, axis=0, keepdims=True)
+            layer.dW = AP.T @ dZ / self.batch_size  # type: ignore[broadcasting numpy]
+            layer.db = np.mean(dZ, axis=0, keepdims=True)
+
+            # Regularization
+            if self.regularization is not None:
+                rdW = self.regularization.compute_gradient(layer.W)
+                layer.dW += rdW
 
             if index > 0:
-                dA = dZ @ self.layers[index].W.T
+                dA = dZ @ layer.W.T
 
     def predict(self, X: NDArray) -> NDArray:
         return self.feedforward(X)
 
     # FIXME: if A and Y are not one-hot encoded, this function will not work correctly
-    def evaluate(self, Y: NDArray, A: NDArray) -> NDArray:
+    def evaluate(self, Y: NDArray, A: NDArray):
         # d: dimensions of A and Y must be the same
         # A: R(N x d), Y: R(N x d)
         Y = np.argmax(Y, axis=1)
@@ -120,15 +136,14 @@ class Sequential(Model):
 
             # Update the parameters of the model
             eta = self.optimizer.eta
-            for layer in self.layers:
-                layer.W -= eta * layer.dW  # type: ignore
-                layer.b -= eta * layer.db  # type: ignore
+            layer.W -= eta * layer.dW  # type: ignore
+            layer.b -= eta * layer.db  # type: ignore
 
+    @staticmethod
     def prepare_data(
-        self,
-        X: NDArray,
-        Y: NDArray,
-        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+            X: NDArray,
+            Y: NDArray,
+            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ):
         # prepare validation data, if not provided => split 20% of the training data
         if validation_data is None:
@@ -143,17 +158,26 @@ class Sequential(Model):
 
     def calculate_loss_accuracy(self, X: NDArray, Y: NDArray):
         YA = self.predict(X)
-        loss = self.loss(Y, YA)
+        base_loss = self.loss(Y, YA)
         accuracy = self.evaluate(Y, YA)
-        return loss, accuracy
+
+        if self.regularization is not None:
+            # Apply regularization to the loss
+            regularization_penalty = 0.0
+            for layer in self.layers:
+                regularization_penalty += self.regularization.compute_penalty(layer.W)
+            return base_loss + regularization_penalty, accuracy
+
+        return base_loss, accuracy
 
     def fit(
-        self,
-        X: NDArray,
-        Y: NDArray,
-        epochs: int = 50,
-        batch_size: int = 32,
-        validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+            self,
+            X: NDArray,
+            Y: NDArray,
+            epochs: int = 50,
+            batch_size: int = 32,
+            validation_data: Optional[Tuple[NDArray, NDArray]] = None,
+            early_stopping: Optional[EarlyStopping] = None,
     ) -> Dict[str, List[Any]]:
         # prepare training and validation data
         X_train, Y_train, X_val, Y_val = self.prepare_data(X, Y, validation_data)
@@ -191,6 +215,7 @@ class Sequential(Model):
             # Calculate loss and accuracy for training and validation data
             loss, accuracy = self.calculate_loss_accuracy(X_train, Y_train)
             val_loss, val_accuracy = self.calculate_loss_accuracy(X_val, Y_val)
+
             history["loss"].append(loss)
             history["accuracy"].append(accuracy)
             history["val_loss"].append(val_loss)
@@ -201,6 +226,24 @@ class Sequential(Model):
                 f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f} - "
                 f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
             )
+
+            if early_stopping is not None:
+                W = [layer.W for layer in self.layers]
+                b = [layer.b for layer in self.layers]
+
+                should_stop = early_stopping.on_epoch_end(
+                    epoch=epoch,
+                    current_value=val_loss,
+                    weights=W,
+                    bias=b
+                )
+                if should_stop:
+                    print(f"Early stopping at epoch {epoch + 1}")
+                    if early_stopping.is_store:
+                        for i, layer in enumerate(self.layers):
+                            layer.W = early_stopping.best_weights[i]
+                            layer.b = early_stopping.best_bias[i]
+                    break
 
         return history
 
