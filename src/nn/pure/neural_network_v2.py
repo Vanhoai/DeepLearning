@@ -47,7 +47,7 @@ class Softmax(ActivationFunction):
         return np.ones_like(x)
 
 
-class ModernNeuralNetwork:
+class NeuralNetworkV2:
     """
     Initializes a modern neural network with specified layers and learning rate.
     Parameters:
@@ -134,7 +134,20 @@ class ModernNeuralNetwork:
         y_pred = np.argmax(Y_pred, axis=1)
         return np.mean(y_true == y_pred)
 
-    def fit(self, X: NDArray, Y: NDArray, epochs: int = 40, batch_size: int = 32):
+    def fit(
+        self,
+        X: NDArray,
+        Y: NDArray,
+        epochs: int = 40,
+        verbose: bool = True,
+        frequency: int = 10,
+        batch_size: int = 32,
+    ) -> dict[str, List[float]]:
+        history: dict = {
+            "loss": [],
+            "accuracy": [],
+        }
+
         for epoch in range(epochs):
             N = X.shape[0]
             indices = np.arange(N)
@@ -157,8 +170,13 @@ class ModernNeuralNetwork:
                     self.b[i] -= self.eta * db[i]  # type: ignore
 
             # Logging after each epoch
-            if epoch % 5 == 0:
+            if verbose and (epoch % frequency == 0):
                 AF, _ = self.feed_forward(X)
                 loss = self.loss(Y, AF[-1])
                 accuracy = self.compute_accuracy(Y, AF[-1])
+                history["loss"].append(loss)
+                history["accuracy"].append(accuracy)
+
                 print(f"epoch: {epoch}, loss: {loss:.4f}, accuracy: {accuracy:.4f}")
+
+        return history

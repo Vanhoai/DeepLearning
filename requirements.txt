@@ -19,3 +19,4 @@ torchview
 transformers
 opencv-python
 numpy
+pytest

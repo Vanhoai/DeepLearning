@@ -37,6 +37,8 @@ class Model(ABC):
         X: NDArray,
         Y: NDArray,
         epochs: int = 100,
+        verbose: bool = True,
+        frequency: int = 10,
         batch_size: int = 32,
         validation_data: Optional[Tuple[NDArray, NDArray]] = None,
     ) -> Dict[str, List[Any]]: ...
@@ -141,9 +143,11 @@ class Sequential(Model):
             # self.optimizer.update(layer, layer.dW, layer.db)
 
             # Update the parameters of the model
-            eta = self.optimizer.eta
-            layer.W -= eta * layer.dW  # type: ignore
-            layer.b -= eta * layer.db  # type: ignore
+            # eta = self.optimizer.eta
+            # layer.W -= eta * layer.dW  # type: ignore
+            # layer.b -= eta * layer.db  # type: ignore
+
+            self.optimizer.update(layer=layer, dW=layer.dW, db=layer.db)
 
     @staticmethod
     def prepare_data(
@@ -181,6 +185,8 @@ class Sequential(Model):
         X: NDArray,
         Y: NDArray,
         epochs: int = 50,
+        verbose: bool = True,
+        frequency: int = 10,
         batch_size: int = 32,
         validation_data: Optional[Tuple[NDArray, NDArray]] = None,
         early_stopping: Optional[EarlyStopping] = None,
@@ -218,40 +224,41 @@ class Sequential(Model):
                 # Update the parameters of the model
                 self.update_parameters()
 
-            # Calculate loss and accuracy for training and validation data
-            loss, accuracy = self.calculate_loss_accuracy(X_train, Y_train)
-            val_loss, val_accuracy = self.calculate_loss_accuracy(X_val, Y_val)
+            if verbose and epoch % frequency == 0:
+                # Calculate loss and accuracy for training and validation data
+                loss, accuracy = self.calculate_loss_accuracy(X_train, Y_train)
+                val_loss, val_accuracy = self.calculate_loss_accuracy(X_val, Y_val)
 
-            history["loss"].append(loss)
-            history["accuracy"].append(accuracy)
-            history["val_loss"].append(val_loss)
-            history["val_accuracy"].append(val_accuracy)
+                history["loss"].append(loss)
+                history["accuracy"].append(accuracy)
+                history["val_loss"].append(val_loss)
+                history["val_accuracy"].append(val_accuracy)
 
-            print(
-                f"Epoch {epoch + 1}/{epochs} - "
-                f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f} - "
-                f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
-            )
-
-            if early_stopping is not None:
-                W = [layer.W for layer in self.layers]
-                b = [layer.b for layer in self.layers]
-
-                # Check if early stopping condition is met
-                should_stop = early_stopping.on_epoch_end(
-                    epoch=epoch,
-                    current_value=val_loss,  # type: ignore
-                    weights=W,
-                    bias=b,
+                print(
+                    f"Epoch {epoch + 1}/{epochs} - "
+                    f"Loss: {loss:.4f}, Accuracy: {accuracy:.4f} - "
+                    f"Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}"
                 )
 
-                if should_stop:
-                    print(f"Early stopping at epoch {epoch + 1}")
-                    if early_stopping.is_store:
-                        for i, layer in enumerate(self.layers):
-                            layer.W = early_stopping.best_weights[i]  # type: ignore
-                            layer.b = early_stopping.best_bias[i]  # type: ignore
-                    break
+                if early_stopping is not None:
+                    W = [layer.W for layer in self.layers]
+                    b = [layer.b for layer in self.layers]
+
+                    # Check if early stopping condition is met
+                    should_stop = early_stopping.on_epoch_end(
+                        epoch=epoch,
+                        current_value=val_loss,  # type: ignore
+                        weights=W,
+                        bias=b,
+                    )
+
+                    if should_stop:
+                        print(f"Early stopping at epoch {epoch + 1}")
+                        if early_stopping.is_store:
+                            for i, layer in enumerate(self.layers):
+                                layer.W = early_stopping.best_weights[i]  # type: ignore
+                                layer.b = early_stopping.best_bias[i]  # type: ignore
+                        break
 
         return history
 
@@ -269,3 +276,32 @@ class Sequential(Model):
         for i, layer in enumerate(self.layers):
             np.save(f"{path}/layer_{i}_weights.npy", layer.W)
             np.save(f"{path}/layer_{i}_biases.npy", layer.b)
+
+    def summary(self, input_dim: int) -> None:
+        print("+------------------------------------------------------------+")
+        print("|{:^60}|".format("SEQUENTIAL MODEL"))
+        print("+----+--------------+----------+----------+------------------+")
+        print(
+            "|{:^4}|{:^14}|{:^10}|{:^10}|{:^18}|".format(
+                "No", "Layer", "Input", "Output", "Parameters"
+            )
+        )
+        print("+----+--------------+----------+----------+------------------+")
+
+        current_input = input_dim
+        for i, layer in enumerate(self.layers):
+            output_dim = layer.W.shape[1]
+            param_count = layer.W.size + layer.b.size
+
+            print(
+                "|{:>3} |{:^14}|{:^10}|{:^10}|{:^18}|".format(
+                    i + 1,
+                    layer.__class__.__name__ if layer.activation else "None",
+                    current_input,
+                    output_dim,
+                    param_count,
+                )
+            )
+
+            print("+----+--------------+----------+----------+------------------+")
+            current_input = output_dim

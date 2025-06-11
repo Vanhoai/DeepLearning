@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 
 
 def relu(X):
@@ -31,7 +32,7 @@ def cross_entropy_loss(Y_true, Y_pred):
     return -np.mean(np.sum(Y_true * np.log(Y_pred), axis=1))
 
 
-class NeuralNetwork:
+class NeuralNetworkV1:
     def __init__(self, learning_rate=1e-3):
         # Learning rate
         self.eta = learning_rate
@@ -127,21 +128,33 @@ class NeuralNetwork:
         self.W1 -= self.eta * dW1
         self.b1 -= self.eta * db1
 
-    def fit(self, X, Y, epochs=10000, verbose=True):
+    def fit(
+        self, X, Y, epochs=10000, verbose=True, frequency=1000
+    ) -> dict[str, List[float]]:
+        history: dict[str, List[float]] = {
+            "loss": [],
+            "accuracy": [],
+        }
+
         for epoch in range(epochs):
             # Forward pass
             A2 = self.forward(X)  # R(1000, 4)
 
-            # Compute loss
-            loss = cross_entropy_loss(Y, A2)  # Scalar value
-            if verbose and epoch % 1000 == 0:
+            if verbose and (epoch + 1) % frequency == 0:
+                loss = cross_entropy_loss(Y, A2)  # Scalar value
                 accuracy = self.compute_accuracy(Y, A2)
+
+                history["loss"].append(loss)
+                history["accuracy"].append(accuracy)
+
                 print(
                     f"Epoch {epoch + 1:5d}/{epochs}, Loss: {loss:.6f}, Accuracy: {accuracy:.4f}"
                 )
 
             # Backward pass
             self.backpropagation(Y)
+
+        return history
 
     @staticmethod
     def compute_accuracy(Y_true, Y_pred):
