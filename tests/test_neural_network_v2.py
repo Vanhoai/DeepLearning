@@ -1,15 +1,14 @@
-import sys
-import os
 import time
-
-src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
-sys.path.insert(0, src)
-
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-from nn.pure.neural_network_v2 import NeuralNetworkV2, ReLU, Softmax, CrossEntropyLoss
-from nn.datasets import load_2d_datasets, load_mnist_dataset
+from src.nn.pure.neural_network_v2 import (
+    NeuralNetworkV2,
+    ReLU,
+    Softmax,
+    CrossEntropyLoss,
+)
+from src.nn.datasets import load_2d_datasets, load_mnist_dataset
 
 
 class TestNeuralNetworkV2(unittest.TestCase):
@@ -64,7 +63,7 @@ class TestNeuralNetworkV2(unittest.TestCase):
         classes = self.classes
 
         layers = [(d, ReLU()), (d1, ReLU()), (d2, ReLU()), (classes, Softmax())]
-        eta = 1e-2
+        eta = 1e-1
         nn = NeuralNetworkV2(
             layers=layers,
             loss=CrossEntropyLoss(),
@@ -136,10 +135,10 @@ class TestNeuralNetworkV2(unittest.TestCase):
         history = nn.fit(
             X_train,
             Y_train,
-            epochs=100,
-            batch_size=512,
+            epochs=10,
+            batch_size=256,
             verbose=True,
-            frequency=10,
+            frequency=1,
         )
         end = time.time()
         print(f"Training time for MNIST dataset: {end - start:.2f} seconds")

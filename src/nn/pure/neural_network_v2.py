@@ -60,7 +60,10 @@ class NeuralNetworkV2:
     """
 
     def __init__(
-        self, layers: List[Tuple[int, ActivationFunction]], loss: LossFunction, eta=1e-3
+        self,
+        layers: List[Tuple[int, ActivationFunction]],
+        loss: LossFunction,
+        eta=1e-3,
     ):
         self.eta: float = eta
         self.layers: List[Tuple[int, ActivationFunction]] = layers

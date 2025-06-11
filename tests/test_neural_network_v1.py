@@ -1,15 +1,9 @@
-import sys
-import os
 import time
-
-src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
-sys.path.insert(0, src)
-
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-from nn.pure.neural_network_v1 import NeuralNetworkV1
-from nn.datasets import load_2d_datasets, load_mnist_dataset
+from src.nn.pure.neural_network_v1 import NeuralNetworkV1
+from src.nn.datasets import load_2d_datasets
 
 
 class TestNeuralNetworkV1(unittest.TestCase):
