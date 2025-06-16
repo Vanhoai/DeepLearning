@@ -5,11 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Hinsun", email = "vanhoai.adv@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "hatchling>=1.27.0",
+    "numpy>=2.3.0",
+    "torch>=2.7.1",
+    "torchvision>=0.22.1",
+]
 
 [project.scripts]
 dl = "dl.main:main"
 benchmark = "benchmark.main:main"
+training = "training:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -19,4 +25,6 @@ build-backend = "hatchling.build"
 members = [
     "packages/core",
     "packages/nn",
+    "packages/backend",
+    "packages/models",
 ]

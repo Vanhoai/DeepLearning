@@ -1,8 +1,6 @@
 [project]
 name = "nn"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 authors = [{ name = "Hinsun", email = "vanhoai.adv@gmail.com" }]
 requires-python = ">=3.10"
 dependencies = []

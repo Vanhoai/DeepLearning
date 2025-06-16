@@ -1,2 +1,6 @@
+from backend import CPUTensor
+
+
 def main() -> None:
-    print("Hello from dl!")
+    tensor = CPUTensor()
+    print("Shape of tensor:", tensor.shape())
