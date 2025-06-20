@@ -7,8 +7,13 @@ authors = [{ name = "Hinsun", email = "vanhoai.adv@gmail.com" }]
 requires-python = ">=3.13"
 dependencies = [
     "hatchling>=1.27.0",
+    "matplotlib>=3.10.3",
     "numpy>=2.3.0",
+    "opencv-python>=4.11.0.86",
     "torch>=2.7.1",
+    "torchinfo>=1.8.0",
+    "torchsummary>=1.5.1",
+    "torchview>=0.2.7",
     "torchvision>=0.22.1",
 ]
 
@@ -27,4 +32,5 @@ members = [
     "packages/nn",
     "packages/backend",
     "packages/models",
+    "packages/cnn",
 ]
