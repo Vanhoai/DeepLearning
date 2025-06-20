@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from typing import List
+from models.blocks import ResidualBlock, BottleneckBlock
 
 
 class ResNet(nn.Module):
@@ -35,6 +36,20 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, BottleneckBlock):
+                    nn.init.constant_(m.bn3.weight, 0)
+                elif isinstance(m, ResidualBlock):
+                    nn.init.constant_(m.bn2.weight, 0)
 
     def _make_layer(self, block, planes: int, num_blocks, stride) -> nn.Sequential:
         strides = [stride] + [1] * (num_blocks - 1)

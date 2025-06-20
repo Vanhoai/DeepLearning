@@ -1,2 +1,2 @@
 def main() -> None:
-    print("Hello from training!")
+    print("Training MobileNetV1 on CIFAR-10 dataset")
