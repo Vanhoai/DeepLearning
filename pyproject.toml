@@ -1,7 +1,7 @@
 [project]
 name = "dl"
 version = "0.1.0"
-description = "Add your description here"
+description = "🐳 Guideline to Deep Learning with PyTorch and Computer Vision"
 readme = "README.md"
 authors = [{ name = "Hinsun", email = "vanhoai.adv@gmail.com" }]
 requires-python = ">=3.13"
@@ -9,7 +9,9 @@ dependencies = [
     "hatchling>=1.27.0",
     "matplotlib>=3.10.3",
     "numpy>=2.3.0",
+    "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
+    "pycocotools>=2.0.10",
     "torch>=2.7.1",
     "torchinfo>=1.8.0",
     "torchsummary>=1.5.1",
@@ -33,4 +35,13 @@ members = [
     "packages/backend",
     "packages/models",
     "packages/cnn",
+    "packages/loader",
 ]
+
+[tool.uv.sources]
+core = { workspace = true }
+nn = { workspace = true }
+backend = { workspace = true }
+models = { workspace = true }
+cnn = { workspace = true }
+loader = { workspace = true }
