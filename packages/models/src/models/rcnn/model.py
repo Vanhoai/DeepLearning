@@ -1,10 +1,15 @@
 import torch
+import torchvision
 import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader
 from torchvision import transforms
 from typing import List, Tuple
 from numpy.typing import NDArray
-from .functions import SelectiveSearch, FeatureExtractor, SoftmaxClassifier
-import multiprocessing
+from .dataset import RCNNDataset, RegionsDataset
+from .search import SelectiveSearch
+from .features import FeatureExtractor
+from .classifier import SoftmaxClassifier
 
 type BoundingBox = Tuple[int, int, int, int]  # (x, y, width, height)
 
@@ -23,13 +28,8 @@ class RCNN:
 
         # Image preprocessing
         self.transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((227, 227)),  # Resize to 227x227 for AlexNet
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225]
-            ),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
 
         # Set eval mode for feature extractor avoid gradient computation
@@ -38,25 +38,13 @@ class RCNN:
         # Loss function
         self.criterion = nn.CrossEntropyLoss()
 
-    def extract_features(self, regions: List[NDArray]) -> torch.Tensor:
+    def extract_features(self, regions: torch.Tensor) -> torch.Tensor:
         if len(regions) == 0:
             return torch.empty(0, 4096)
 
-        batch_regions = []
-        for region in regions:
-            if len(region.shape) == 3:
-                region_tensor = self.transform(region)
-                batch_regions.append(region_tensor)
-
-        if len(batch_regions) == 0:
-            return torch.empty(0, 4096)
-
-        # Stack into batch
-        batch_tensor = torch.stack(batch_regions).to(self.device)
-
         # Extract features
         with torch.no_grad():
-            features = self.feature_extractor(batch_tensor)
+            features = self.feature_extractor(regions)
 
         return features
 
@@ -91,6 +79,8 @@ class RCNN:
         for idx, image in enumerate(images):
             # Get region proposals using selective search
             proposals = self.selective_search.proposals(image)  # 2000k region proposals
+            print(f"Processing image {idx + 1}/{len(images)}: {len(proposals)} proposals found")
+
             gt_boxes = ground_truth_boxes[idx]
             gt_labels = ground_truth_labels[idx]
 
@@ -130,8 +120,59 @@ class RCNN:
         # Prepare training data
         print("Starting preparation of training data 🫧")
         regions, labels = self.prepare_training(images, ground_truth_boxes, ground_truth_labels)
-        print(f"Prepared {len(regions)} regions for training.")
+        print("Number of regions prepared for training:", len(regions))
 
-        # Extract features from regions
-        # features = self.extract_features(regions)
-        # print(f"Extracted features shape: {features.shape}")
+        # Build dataset for RCNN
+        dataset = RegionsDataset(regions=regions, labels=labels, transform=self.transform)
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+        # Setup optimizer
+        optimizer = optim.Adam(self.classifier.parameters(), lr=learning_rate)
+
+        # Training loop
+        self.feature_extractor.eval()  # Keep feature extractor frozen
+        self.classifier.train()
+
+        for epoch in range(epochs):
+            total_loss = 0.0
+            correct = 0
+            total = 0
+
+            for batch_idx, item in enumerate(dataloader):
+                regions_batch, labels_batch = item
+
+                # convert to tensors and move to device
+                regions_batch = regions_batch.to(self.device)  # type: ignore
+                labels_batch = torch.tensor(labels_batch, dtype=torch.long).to(self.device)
+
+                # Extract features for the batch
+                features = self.extract_features(regions_batch)  # type: ignore
+                if features.size(0) == 0:
+                    continue
+
+                # output of feature extractor is (batch_size, 4096)
+                # Forward pass
+                optimizer.zero_grad()
+                outputs = self.classifier(features)
+                loss = self.criterion(outputs, labels_batch)
+
+                # Backward pass
+                loss.backward()
+                optimizer.step()
+
+                # Statistics
+                total_loss += loss.item()
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels_batch.size(0)
+                correct += (predicted == labels_batch).sum().item()  # type: ignore
+
+                if batch_idx % 10 == 0:
+                    print(f'Epoch [{epoch + 1}/{epochs}], Batch [{batch_idx + 1}], '
+                          f'Loss: {loss.item():.4f}')
+
+            accuracy = 100 * correct / total if total > 0 else 0
+            avg_loss = total_loss / len(dataloader) if len(dataloader) > 0 else 0
+            print(f'Epoch [{epoch + 1}/{epochs}] completed: '
+                  f'Average Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%')
+
+        print("Training completed!")

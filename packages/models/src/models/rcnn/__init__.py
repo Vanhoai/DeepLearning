@@ -1,4 +1,7 @@
-from .functions import SelectiveSearch, FeatureExtractor, RCNNDataset
+from .dataset import RCNNDataset
+from .features import FeatureExtractor
+from .search import SelectiveSearch
+from .transforms import ToTensor, Normalize
 from .model import RCNN
 
-__all__ = ["SelectiveSearch", "FeatureExtractor", "RCNNDataset", "RCNN"]
+__all__ = ["SelectiveSearch", "FeatureExtractor", "RCNNDataset", "ToTensor", "Normalize", "RCNN"]

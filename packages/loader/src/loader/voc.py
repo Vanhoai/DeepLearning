@@ -1,6 +1,7 @@
 import os
 import cv2
 from xml.etree import ElementTree
+from torch.utils.data import Dataset
 
 
 def load_pascal_voc_dataset(dataset_path: str, split: str = 'train'):
@@ -88,3 +89,11 @@ def load_pascal_voc_dataset(dataset_path: str, split: str = 'train'):
 
     print(f"Loaded {len(images)} images from {split} split")
     return images, all_boxes, all_labels
+
+
+class PascalVOCDataset(Dataset):
+    def __len__(self):
+        pass
+
+    def __getitem__(self, dix):
+        pass

@@ -11,7 +11,9 @@ dependencies = [
     "numpy>=2.3.0",
     "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
+    "pandas>=2.3.0",
     "pycocotools>=2.0.10",
+    "scikit-image>=0.25.2",
     "torch>=2.7.1",
     "torchinfo>=1.8.0",
     "torchsummary>=1.5.1",
@@ -21,8 +23,9 @@ dependencies = [
 
 [project.scripts]
 dl = "dl.main:main"
-benchmark = "benchmark.main:main"
+benchmark = "benchmark:main"
 training = "training:main"
+inference = "inference:main"
 
 [build-system]
 requires = ["hatchling"]
