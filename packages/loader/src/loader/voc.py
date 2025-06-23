@@ -1,3 +1,4 @@
+import torch
 import os
 import cv2
 from xml.etree import ElementTree
@@ -92,8 +93,27 @@ def load_pascal_voc_dataset(dataset_path: str, split: str = 'train'):
 
 
 class PascalVOCDataset(Dataset):
-    def __len__(self):
-        pass
+    def __int__(self, path: str, split: str = "train", transform=None):
+        self.path = path
+        self.split = split
+        self.images, self.boxes, self.labels = load_pascal_voc_dataset(path, split)
+        self.transform = transform
 
-    def __getitem__(self, dix):
-        pass
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        boxes = self.boxes[idx]
+        labels = self.labels[idx]
+
+        target = {
+            "boxes": torch.tensor(boxes, dtype=torch.float32),
+            "labels": torch.tensor(labels, dtype=torch.int64),
+        }
+
+        if self.transform:
+            # should have to tensor and normalize
+            image, target = self.transform(image, target)
+
+        return image, target
