@@ -1,18 +1,18 @@
 import torch
 import torch.nn as nn
 from typing import List
-from models.blocks import ResidualBlock, BottleneckBlock
+from .blocks import ResidualBlock, BottleneckBlock
 
 
 class ResNet(nn.Module):
 
     def __init__(
-        self,
-        block,
-        num_blocks: List[int],
-        in_channels: int = 3,
-        num_classes: int = 1000,
-        zero_init_residual=False,
+            self,
+            block,
+            num_blocks: List[int],
+            in_channels: int = 3,
+            num_classes: int = 1000,
+            zero_init_residual=False,
     ):
         super(ResNet, self).__init__()
         self.in_channels = 64

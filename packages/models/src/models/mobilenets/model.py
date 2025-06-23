@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from models.blocks import DepthwiseSeparableBlock, InvertedResidualBlock
+from .blocks import DepthwiseSeparableBlock, InvertedResidualBlock
 
 
 class MobileNetV1(nn.Module):
@@ -79,14 +79,7 @@ class MobileNetV2(nn.Module):
             output_channel = c
             for i in range(n):
                 stride = s if i == 0 else 1
-                layers.append(
-                    InvertedResidualBlock(
-                        input_channels,
-                        output_channel,
-                        stride,
-                        t,
-                    )
-                )
+                layers.append(InvertedResidualBlock(input_channels, output_channel, stride, t))  # type: ignore
                 input_channels = output_channel
 
         # Final Conv 1x1
