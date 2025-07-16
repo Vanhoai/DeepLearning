@@ -1,7 +1,6 @@
 import torch
 from models import BackboneWithFPN
 
-
 def main() -> None:
     backbone = BackboneWithFPN(backbone_name="resnet50", pretrained=True)
 

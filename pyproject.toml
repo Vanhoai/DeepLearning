@@ -19,10 +19,11 @@ dependencies = [
     "torchsummary>=1.5.1",
     "torchview>=0.2.7",
     "torchvision>=0.22.1",
+    "ultralytics>=8.3.167",
 ]
 
 [project.scripts]
-dl = "dl.main:main"
+dl = "dl:main"
 benchmark = "benchmark:main"
 training = "training:main"
 inference = "inference:main"
