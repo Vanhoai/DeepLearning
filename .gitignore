@@ -60,6 +60,7 @@ cover/
 *.mo
 *.pot
 *.mp4
+*.pt
 
 # Django stuff:
 *.log
