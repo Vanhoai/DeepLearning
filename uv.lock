@@ -10,19 +10,10 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "backend",
-    "cnn",
     "core",
     "dl",
-    "loader",
-    "models",
     "nn",
 ]
-
-[[package]]
-name = "backend"
-version = "0.1.0"
-source = { editable = "packages/backend" }
 
 [[package]]
 name = "certifi"
@@ -67,11 +58,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e9/b0/0200da600134e001d91851ddc797809e2fe0ea72de90e09bec5a2fbdaccb/charset_normalizer-3.4.2-cp313-cp313-win_amd64.whl", hash = "sha256:aa6af9e7d59f9c12b33ae4e9450619cf2488e2bbe9b44030905877f0b2324980", size = 105641, upload-time = "2025-05-02T08:33:18.753Z" },
     { url = "https://files.pythonhosted.org/packages/20/94/c5790835a017658cbfabd07f3bfb549140c3ac458cfc196323996b10095a/charset_normalizer-3.4.2-py3-none-any.whl", hash = "sha256:7f56930ab0abd1c45cd15be65cc741c28b1c9a34876ce8c17a2fa107810c0af0", size = 52626, upload-time = "2025-05-02T08:34:40.053Z" },
 ]
-
-[[package]]
-name = "cnn"
-version = "0.1.0"
-source = { editable = "packages/cnn" }
 
 [[package]]
 name = "colorama"
@@ -341,11 +327,6 @@ wheels = [
 ]
 
 [[package]]
-name = "loader"
-version = "0.1.0"
-source = { editable = "packages/loader" }
-
-[[package]]
 name = "markupsafe"
 version = "3.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -419,11 +400,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d8/e9/6ce8edd264c8819e37bbed8172e0ccdc7107fe86999b76ab5752276357a4/matplotlib-3.10.3-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:6c7818292a5cc372a2dc4c795e5c356942eb8350b98ef913f7fda51fe175ac5d", size = 9413699, upload-time = "2025-05-08T19:10:42.376Z" },
     { url = "https://files.pythonhosted.org/packages/1b/92/9a45c91089c3cf690b5badd4be81e392ff086ccca8a1d4e3a08463d8a966/matplotlib-3.10.3-cp313-cp313t-win_amd64.whl", hash = "sha256:4f23ffe95c5667ef8a2b56eea9b53db7f43910fa4a2d5472ae0f72b64deab4d5", size = 8139044, upload-time = "2025-05-08T19:10:44.551Z" },
 ]
-
-[[package]]
-name = "models"
-version = "0.1.0"
-source = { editable = "packages/models" }
 
 [[package]]
 name = "mpmath"

@@ -27,6 +27,7 @@
 This project combines the power of **Deep Learning** and **Computer Vision** to solve complex visual recognition tasks. Built with modern ML frameworks, it provides implementations of cutting-edge neural network architectures for various computer vision applications.
 
 ### 🎯 Key Objectives
+
 - Implement state-of-the-art deep learning models for computer vision
 - Provide easy-to-use APIs for image processing and analysis
 - Achieve high accuracy on benchmark datasets
@@ -34,18 +35,19 @@ This project combines the power of **Deep Learning** and **Computer Vision** to 
 
 ## ✨ Features
 
-| Feature | Description | Status |
-|---------|-------------|--------|
-| 🖼️ **Image Classification** | Multi-class image recognition with CNN architectures | ✅ Complete |
-| 🎯 **Object Detection** | Real-time object detection using YOLO/SSD models | ✅ Complete |
-| 🎭 **Semantic Segmentation** | Pixel-level image segmentation | 🚧 In Progress |
-| 👁️ **Face Recognition** | Advanced facial recognition and verification | ✅ Complete |
-| 📊 **Data Augmentation** | Comprehensive image preprocessing pipeline | ✅ Complete |
-| ⚡ **GPU Acceleration** | CUDA support for faster training and inference | ✅ Complete |
+| Feature                      | Description                                          | Status         |
+| ---------------------------- | ---------------------------------------------------- | -------------- |
+| 🖼️ **Image Classification**  | Multi-class image recognition with CNN architectures | ✅ Complete    |
+| 🎯 **Object Detection**      | Real-time object detection using YOLO/SSD models     | ✅ Complete    |
+| 🎭 **Semantic Segmentation** | Pixel-level image segmentation                       | 🚧 In Progress |
+| 👁️ **Face Recognition**      | Advanced facial recognition and verification         | ✅ Complete    |
+| 📊 **Data Augmentation**     | Comprehensive image preprocessing pipeline           | ✅ Complete    |
+| ⚡ **GPU Acceleration**      | CUDA support for faster training and inference       | ✅ Complete    |
 
 ## 🛠️ Installation
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - CUDA 11.0+ (for GPU support)
 - Git
@@ -124,14 +126,15 @@ dl-computer-vision/
 
 ### Implemented Architectures
 
-| Model Type | Architecture | Use Case | Accuracy |
-|------------|-------------|----------|----------|
-| **CNN** | ResNet-50/101 | Image Classification | 95.2% |
-| **Object Detection** | YOLOv5/v8 | Real-time Detection | 89.7% mAP |
-| **Segmentation** | U-Net, DeepLab | Semantic Segmentation | 87.3% IoU |
-| **Face Recognition** | FaceNet, ArcFace | Identity Verification | 99.1% |
+| Model Type           | Architecture     | Use Case              | Accuracy  |
+| -------------------- | ---------------- | --------------------- | --------- |
+| **CNN**              | ResNet-50/101    | Image Classification  | 95.2%     |
+| **Object Detection** | YOLOv5/v8        | Real-time Detection   | 89.7% mAP |
+| **Segmentation**     | U-Net, DeepLab   | Semantic Segmentation | 87.3% IoU |
+| **Face Recognition** | FaceNet, ArcFace | Identity Verification | 99.1%     |
 
 ### 🔧 Supported Frameworks
+
 - ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white)
 - ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white)
 - ![OpenCV](https://img.shields.io/badge/OpenCV-27338e?style=flat&logo=OpenCV&logoColor=white)
@@ -139,6 +142,7 @@ dl-computer-vision/
 ## 📊 Datasets
 
 ### Supported Datasets
+
 - **CIFAR-10/100** - Image classification
 - **COCO** - Object detection and segmentation
 - **ImageNet** - Large-scale image recognition
@@ -194,13 +198,14 @@ detector.start_webcam_detection()  # Press 'q' to quit
 
 ### Benchmark Results
 
-| Dataset | Model | Accuracy | Speed (FPS) | Model Size |
-|---------|-------|----------|-------------|------------|
-| CIFAR-10 | ResNet-50 | 95.2% | 180 | 25.6 MB |
-| COCO | YOLOv5s | 37.4 mAP | 165 | 14.1 MB |
-| ImageNet | EfficientNet-B0 | 77.1% | 134 | 5.3 MB |
+| Dataset  | Model           | Accuracy | Speed (FPS) | Model Size |
+| -------- | --------------- | -------- | ----------- | ---------- |
+| CIFAR-10 | ResNet-50       | 95.2%    | 180         | 25.6 MB    |
+| COCO     | YOLOv5s         | 37.4 mAP | 165         | 14.1 MB    |
+| ImageNet | EfficientNet-B0 | 77.1%    | 134         | 5.3 MB     |
 
 ### 🔥 Performance Optimizations
+
 - ⚡ **TensorRT** integration for NVIDIA GPUs
 - 🚀 **ONNX** support for cross-platform deployment
 - 📱 **Mobile optimization** with quantization
@@ -228,7 +233,9 @@ mypy src/
 ```
 
 ### 🐛 Reporting Issues
+
 Found a bug? Please [open an issue](https://github.com/yourusername/dl-computer-vision/issues) with:
+
 - Detailed description
 - Steps to reproduce
 - Expected vs actual behavior
