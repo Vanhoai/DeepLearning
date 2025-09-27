@@ -35,6 +35,7 @@ build-backend = "hatchling.build"
 members = [
     "packages/core",
     "packages/nn",
+    "packages/knowledges",
 ]
 
 [tool.uv.sources]
