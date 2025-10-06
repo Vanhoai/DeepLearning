@@ -1,5 +1,4 @@
 import numpy as np
-from keras import datasets
 from matplotlib import pyplot as plt
 from typing import Optional
 from numpy.typing import NDArray

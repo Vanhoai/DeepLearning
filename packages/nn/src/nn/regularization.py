@@ -45,7 +45,9 @@ class RegularizationType(Enum):
 
 class RegularizationFactory:
     @staticmethod
-    def create(regularization_type: RegularizationType, lambda_regularization: float = 1e-2) -> Regularization:
+    def create(
+        regularization_type: RegularizationType, lambda_regularization: float = 1e-2
+    ) -> Regularization:
         if regularization_type == RegularizationType.NO_REGULARIZATION:
             return NoRegularization(lambda_regularization)
         elif regularization_type == RegularizationType.L2_REGULARIZATION:

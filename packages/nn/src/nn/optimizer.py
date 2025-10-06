@@ -41,11 +41,11 @@ class SGD(Optimizer):
     """
 
     def __init__(
-            self,
-            eta: float = 1e-3,
-            momentum: float = 0.9,
-            nesterov: bool = True,
-            weight_decay: float = 0.0,
+        self,
+        eta: float = 1e-3,
+        momentum: float = 0.9,
+        nesterov: bool = True,
+        weight_decay: float = 0.0,
     ) -> None:
         super().__init__(eta)
 
@@ -98,13 +98,20 @@ class AdaGrad(Optimizer):
     This optimizer adapts the learning rate for each parameter based on the historical gradients.
     It is particularly useful for dealing with sparse data and features.
     Formula:
-    vt = vt + g^2
-    w = w - η / (sqrt(vt) + ε)  * g
+    G(t) = G(t - 1) + g(t)^2
+    w(t + 1) = w(t) - η / (sqrt(G(t)) + ε)  * g(t)
     where:
-    - vt is the accumulated squared gradient
-    - g is the gradient
+    - G(t) is the accumulated squared gradients up to the time step t
+    - g(t) is the gradient at time step t
     - η is the learning rate
     - ε is a small constant to avoid division by zero
+
+    Benefits:
+    - Adapts learning rates for each parameter individually
+    - Effective for sparse data and features
+    - Reduces the need for manual learning rate tuning
+    Drawbacks:
+    - Accumulation of squared gradients can lead to overly small learning rates
     """
 
     def __init__(self, eta: float = 1e-3) -> None:
@@ -128,8 +135,8 @@ class AdaGrad(Optimizer):
         vtb = self.vtb[layer_id]
 
         # Accumulate squared gradients
-        vtW += dW ** 2
-        vtb += db ** 2
+        vtW += dW**2
+        vtb += db**2
 
         # Apply parameter update with element-wise division
         layer.W -= self.eta * dW / (np.sqrt(vtW) + self.epsilon)
@@ -142,10 +149,11 @@ class RMSProp(Optimizer):
     This optimizer is designed to adapt the learning rate for each parameter based on the average of recent gradients.
     It helps to stabilize the learning process and is particularly effective for non-stationary objectives.
     Formula:
-    vt = β * vt-1 + (1 - β) * g^2
-    w = w - η / (sqrt(vt) + ε) * g
+    E[g^2](t) = β * E[g^2](t - 1) + (1 - β) * g(t)^2
+    w(t + 1) = w(t) - η / (sqrt(E[g^2](t)) + ε) * g(t)
     where:
-    - vt is the moving average of squared gradients
+    - E[g^2](t) is the exponentially weighted moving average of squared gradients
+    - g(t) is the gradient at time step t
     - β is the decay rate (typically around 0.9 or 0.95)
     - g is the gradient
     - η is the learning rate
@@ -174,8 +182,8 @@ class RMSProp(Optimizer):
         vtb = self.vtb[layer_id]
 
         # Update moving average of squared gradients
-        vtW[:] = self.beta * vtW + (1 - self.beta) * dW ** 2
-        vtb[:] = self.beta * vtb + (1 - self.beta) * db ** 2
+        vtW[:] = self.beta * vtW + (1 - self.beta) * dW**2
+        vtb[:] = self.beta * vtb + (1 - self.beta) * db**2
 
         # Apply parameter update with element-wise division
         layer.W -= self.eta * dW / (np.sqrt(vtW) + self.epsilon)
@@ -206,11 +214,11 @@ class Adam(Optimizer):
     """
 
     def __init__(
-            self,
-            eta: float = 1e-3,
-            beta1: float = 0.9,
-            beta2: float = 0.999,
-            epsilon: float = 1e-8,
+        self,
+        eta: float = 1e-3,
+        beta1: float = 0.9,
+        beta2: float = 0.999,
+        epsilon: float = 1e-8,
     ):
         super().__init__(eta)
         self.beta1 = beta1
@@ -250,15 +258,15 @@ class Adam(Optimizer):
         self.mb[layer_id] = self.beta1 * self.mb[layer_id] + (1 - self.beta1) * db
 
         # Update RMS estimates (v)
-        self.vW[layer_id] = self.beta2 * self.vW[layer_id] + (1 - self.beta2) * (dW ** 2)
-        self.vb[layer_id] = self.beta2 * self.vb[layer_id] + (1 - self.beta2) * (db ** 2)
+        self.vW[layer_id] = self.beta2 * self.vW[layer_id] + (1 - self.beta2) * (dW**2)
+        self.vb[layer_id] = self.beta2 * self.vb[layer_id] + (1 - self.beta2) * (db**2)
 
         # Bias correction
-        mW_hat = self.mW[layer_id] / (1 - self.beta1 ** t)
-        vW_hat = self.vW[layer_id] / (1 - self.beta2 ** t)
+        mW_hat = self.mW[layer_id] / (1 - self.beta1**t)
+        vW_hat = self.vW[layer_id] / (1 - self.beta2**t)
 
-        mb_hat = self.mb[layer_id] / (1 - self.beta1 ** t)
-        vb_hat = self.vb[layer_id] / (1 - self.beta2 ** t)
+        mb_hat = self.mb[layer_id] / (1 - self.beta1**t)
+        vb_hat = self.vb[layer_id] / (1 - self.beta2**t)
 
         # Update weights and biases
         layer.W -= self.eta * mW_hat / (np.sqrt(vW_hat) + self.epsilon)

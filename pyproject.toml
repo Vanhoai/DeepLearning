@@ -24,7 +24,6 @@ dependencies = [
 
 [project.scripts]
 dl = "dl:main"
-benchmark = "benchmark:main"
 training = "training:main"
 
 [build-system]
