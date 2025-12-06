@@ -4,39 +4,10 @@ version = "0.1.0"
 description = "🐳 Guideline to Deep Learning with PyTorch and Computer Vision"
 readme = "README.md"
 authors = [{ name = "Hinsun", email = "vanhoai.adv@gmail.com" }]
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
-    "hatchling>=1.27.0",
-    "matplotlib>=3.10.3",
-    "numpy>=2.3.1",
-    "opencv-contrib-python>=4.11.0.86",
-    "opencv-python>=4.11.0.86",
-    "pandas>=2.3.1",
-    "pycocotools>=2.0.10",
-    "scikit-image>=0.25.2",
-    "torch>=2.7.1",
-    "torchinfo>=1.8.0",
-    "torchsummary>=1.5.1",
-    "torchview>=0.2.7",
-    "torchvision>=0.22.1",
-    "ultralytics>=8.3.167",
+    "matplotlib>=3.10.7",
+    "torch>=2.9.1",
+    "torchvision>=0.24.1",
+    "tqdm>=4.67.1",
 ]
-
-[project.scripts]
-dl = "dl:main"
-training = "training:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.uv.workspace]
-members = [
-    "packages/core",
-    "packages/nn",
-    "packages/knowledges",
-]
-
-[tool.uv.sources]
-core = { workspace = true }
-nn = { workspace = true }

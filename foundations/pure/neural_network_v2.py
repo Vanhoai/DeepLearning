@@ -1,6 +1,7 @@
-import numpy as np
-from typing import Tuple, List
 from abc import ABC, abstractmethod
+from typing import List, Tuple
+
+import numpy as np
 from numpy.typing import NDArray
 
 
